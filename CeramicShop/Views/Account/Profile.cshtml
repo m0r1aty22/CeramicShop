@@ -1,0 +1,366 @@
+﻿@model CeramicShop.Models.User
+
+@{
+    ViewBag.Title = "Hồ sơ người dùng";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center"" style="padding: 15px;">
+                    <img src="/Images/MKD.png" alt="avatar"
+                         class="rounded-circle img-fluid" style="width: 150px;">
+                    <h5 class="my-3">@Model.FullName</h5>
+                    <p class="text-muted mb-1">@Model.UserName</p>
+                    <p class="text-muted mb-4">@(string.IsNullOrEmpty(Model.Address) ? "Chưa cập nhật địa chỉ" : Model.Address)</p>
+                    <div class="d-flex justify-content-center mb-2">
+                        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-edit me-1"></i>Chỉnh sửa hồ sơ
+                        </button>
+                        @if (User.IsInRole("Admin")) // Kiểm tra vai trò của người dùng
+                        {
+                            <a href="@Url.Action("Index", "Admin")" class="btn btn-info">
+                                <i class="fas fa-user-shield me-1"></i>Trang Admin
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4 mb-lg-0">
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush rounded-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <i class="fas fa-user fa-lg text-primary"></i>
+                            <p class="mb-0">Tài khoản của tôi</p>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <i class="fas fa-shopping-bag fa-lg text-success"></i>
+                            <a href="@Url.Action("TrackOrders", "Order")" class="mb-0 text-decoration-none">Đơn hàng của tôi</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <i class="fas fa-heart fa-lg text-danger"></i>
+                            <a href="@Url.Action("Index", "Wishlist")" class="mb-0 text-decoration-none">Danh sách yêu thích</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <i class="fas fa-key fa-lg text-warning"></i>
+                            <a href="#" class="mb-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Đổi mật khẩu</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin cá nhân</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0 fw-bold">Họ và tên</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@Model.FullName</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0 fw-bold">Email</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@Model.Email</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0 fw-bold">Số điện thoại</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.Phone) ? "Chưa cập nhật" : Model.Phone)</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0 fw-bold">Địa chỉ</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.Address) ? "Chưa cập nhật" : Model.Address)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Đơn hàng gần đây</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RecentOrders != null && ViewBag.RecentOrders.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in ViewBag.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>#@order.OrderID</td>
+                                            <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                            <td>@order.TotalAmount.ToString("N0") VNĐ</td>
+                                            <td>
+                                                @switch (order.OrderStatus)
+                                                {
+                                                    case "Pending":
+                                                        <span class="badge bg-warning">Chờ xác nhận</span>
+                                                        break;
+                                                    case "Processing":
+                                                        <span class="badge bg-info">Đang xử lý</span>
+                                                        break;
+                                                    case "Shipped":
+                                                        <span class="badge bg-primary">Đang giao hàng</span>
+                                                        break;
+                                                    case "Delivered":
+                                                        <span class="badge bg-success">Đã giao hàng</span>
+                                                        break;
+                                                    case "Cancelled":
+                                                        <span class="badge bg-danger">Đã hủy</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@order.OrderStatus</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("OrderDetails", "Order", new { id = order.OrderID })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Chi tiết
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Bạn chưa có đơn hàng nào.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer text-center">
+                    <a href="@Url.Action("TrackOrders", "Order")" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Xem tất cả đơn hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editProfileModalLabel"><i class="fas fa-user-edit me-2"></i>Chỉnh sửa hồ sơ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UpdateProfile" asp-controller="Account" method="post">
+                <div class="modal-body">
+                    @* <input type="hidden" name="UserID" value="@Model.UserID" /> *@
+                    @* <input type="hidden" name="UserName" value="@Model.UserName" /> *@
+                    @* <input type="hidden" name="Password" value="@Model.Password" /> *@
+                    @* <input type="hidden" name="Role" value="@Model.Role" /> *@
+                    @* <input type="hidden" name="CreatedAt" value="@Model.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")" /> *@
+
+                    <div class="mb-3">
+                        <label for="FullName" class="form-label">Họ và tên</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="FullName" name="FullName" value="@Model.FullName" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Phone" class="form-label">Số điện thoại</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                            <input type="tel" class="form-control" id="Phone" name="Phone" value="@Model.Phone">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Address" class="form-label">Địa chỉ</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-home"></i></span>
+                            <textarea class="form-control" id="Address" name="Address" rows="3">@Model.Address</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="changePasswordModalLabel"><i class="fas fa-key me-2"></i>Đổi mật khẩu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ChangePassword" asp-controller="Account" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="CurrentPassword" class="form-label">Mật khẩu hiện tại</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="CurrentPassword" name="CurrentPassword" required>
+                            <button class="btn btn-outline-secondary password-toggle" type="button" data-target="#CurrentPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="NewPassword" class="form-label">Mật khẩu mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="NewPassword" name="NewPassword" required>
+                            <button class="btn btn-outline-secondary password-toggle" type="button" data-target="#NewPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ConfirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required>
+                            <button class="btn btn-outline-secondary password-toggle" type="button" data-target="#ConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="password-match-error" class="text-danger mt-1"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Đổi mật khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Thành công</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="successMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Lỗi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+
+            // Hiển thị thông báo lỗi nếu có
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <text>
+                        $('#errorMessage').text('@ViewBag.ErrorMessage');
+                        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                        errorModal.show();
+            </text>
+        }
+
+            // Toggle password visibility
+            $('.password-toggle').click(function() {
+                var target = $(this).data('target');
+                var input = $(target);
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            // Kiểm tra mật khẩu mới và xác nhận mật khẩu
+            $('#ConfirmPassword').on('keyup', function() {
+                var newPassword = $('#NewPassword').val();
+                var confirmPassword = $(this).val();
+
+                if (newPassword !== confirmPassword) {
+                    $('#password-match-error').text('Mật khẩu không khớp');
+                } else {
+                    $('#password-match-error').text('');
+                }
+            });
+
+            // Kiểm tra khi mật khẩu mới thay đổi
+            $('#NewPassword').on('keyup', function() {
+                var newPassword = $(this).val();
+                var confirmPassword = $('#ConfirmPassword').val();
+
+                if (confirmPassword && newPassword !== confirmPassword) {
+                    $('#password-match-error').text('Mật khẩu không khớp');
+                } else if (confirmPassword) {
+                    $('#password-match-error').text('');
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,126 @@
+﻿@model CeramicShop.Models.ViewModels.CartViewModel
+
+@{
+    ViewBag.Title = "Checkout";
+}
+
+<div class="checkout-container">
+    <h1 class="mb-4">Thanh toán</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin đơn đặt hàng</h5>
+                </div>
+                <div class="card-body">
+                    <form id="checkoutForm" action="@Url.Action("PlaceOrder", "Order")" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="fullName" class="form-label">Họ tên</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="shippingAddress" class="form-label">Địa chỉ giao hàng</label>
+                            <textarea class="form-control" id="shippingAddress" name="shippingAddress" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Ghi chú(nếu có)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="paymentMethodId" class="form-label">Phương thức thanh toán</label>
+                            <select class="form-select" id="paymentMethodId" name="paymentMethodId" required>
+                                <option value="">Select Payment Method</option>
+                                @foreach (var item in ViewBag.PaymentMethods)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card order-summary">
+                <div class="card-header">
+                    <h5 class="mb-0">Tổng đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="order-item d-flex justify-content-between mb-3">
+                            <div class="d-flex">
+                                <img src="/Images/@item.ImagePath" class="order-item-image me-2">
+                                <div>
+                                    <div>@item.ProductName</div>
+                                    <small class="text-muted">Qty: @item.Quantity</small>
+                                </div>
+                            </div>
+                            <span>@item.TotalPrice.ToString("N0") VNĐ</span>
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+                        <span>Tạm tính</span>
+                        <span>@ViewBag.OriginalTotal.ToString("N0") VNĐ</span>
+                    </div>
+
+                    @if (ViewBag.DiscountPercentage > 0)
+                    {
+                        <div class="d-flex justify-content-between text-success">
+                            <span>Giảm giá (@ViewBag.PromoCode - @ViewBag.DiscountPercentage%)</span>
+                            <span>-@((ViewBag.OriginalTotal - ViewBag.DiscountedTotal).ToString("N0")) VNĐ</span>
+                        </div>
+                    }
+
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Tổng thanh toán</span>
+                        <span>@ViewBag.DiscountedTotal.ToString("N0") VNĐ</span>
+                    </div>
+
+                    <button type="submit" form="checkoutForm" class="btn btn-primary w-100 mt-3">Đặt hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Pre-fill form with user data if available
+        @if (User.Identity.IsAuthenticated)
+        {
+            <text>
+                        $.ajax({
+                            url: '@Url.Action("GetUserInfo", "Account")',
+                            type: 'GET',
+                            success: function(data) {
+                                if (data) {
+                                    $('#fullName').val(data.fullName);
+                                    $('#phone').val(data.phone);
+                                    $('#shippingAddress').val(data.address);
+                                }
+                            }
+                        });
+            </text>
+        }
+        });
+    </script>
+}

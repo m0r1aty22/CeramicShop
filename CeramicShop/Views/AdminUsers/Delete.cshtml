@@ -1,0 +1,49 @@
+﻿@model CeramicShop.Models.User
+@{
+    ViewData["Title"] = "Xoá người dùng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Xác nhận xoá người dùng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Người dùng</a></li>
+        <li class="breadcrumb-item active">Xoá</li>
+    </ol>
+
+    <div class="alert alert-warning">
+        <strong>Bạn có chắc chắn muốn xoá người dùng sau?</strong> Hành động này không thể hoàn tác.
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-user-slash mr-1"></i> Thông tin người dùng</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Tên đăng nhập</dt>
+                <dd class="col-sm-9">@Model.UserName</dd>
+
+                <dt class="col-sm-3">Họ tên</dt>
+                <dd class="col-sm-9">@Model.FullName</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Vai trò</dt>
+                <dd class="col-sm-9">@Model.Role</dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="UserID" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt mr-1"></i> Xoá vĩnh viễn
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> Huỷ
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

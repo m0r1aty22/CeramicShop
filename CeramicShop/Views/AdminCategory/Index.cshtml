@@ -1,0 +1,279 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@model IEnumerable<CeramicShop.Models.Category>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    Layout = "_AdminLayout"; // Đảm bảo _AdminLayout.cshtml đã được cập nhật để include DataTables JS và CSS đúng cách
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý danh mục</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item active">Danh mục</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-list mr-1"></i>
+                Danh sách danh mục
+            </div>
+            <div>
+                <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Thêm danh mục
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <form method="get" action="@Url.Action("Index")">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." name="searchString" value="@ViewBag.SearchString">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="categoriesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px; text-align: center;"></th> <!-- Cột cho nút expand/collapse -->
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th class="text-center" style="width: 100px;">SL DM Phụ</th>
+                            <th style="width: 120px;">Trạng thái</th>
+                            <th style="width: 150px;" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model)
+                        {
+                            <tr data-category-id="@category.CategoryID">
+                                <td class="dt-control text-center">
+                                    @if (category.SubCategories != null && category.SubCategories.Any())
+                                    {
+                                        <i class="fas fa-plus-circle text-primary"></i>
+                                    }
+                                </td>
+                                <td>@category.CategoryName</td>
+                                <td>@(string.IsNullOrEmpty(category.Description) ? "" : (category.Description.Length > 50 ? category.Description.Substring(0, 50) + "..." : category.Description))</td>
+                                <td class="text-center">
+                                    @if (category.SubCategories != null && category.SubCategories.Any())
+                                    {
+                                        <span class="badge badge-info">@category.SubCategories.Count</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">0</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (category.IsActive == true)
+                                    {
+                                        <span class="badge badge-success">Kích hoạt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Vô hiệu</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Edit", new { id = category.CategoryID })" class="btn btn-info" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Details", new { id = category.CategoryID })" class="btn btn-warning" title="Chi tiết">
+                                            <i class="fas fa-eye"></i> <!-- Đổi icon cho dễ phân biệt -->
+                                        </a>
+                                        <a href="@Url.Action("Delete", new { id = category.CategoryID })" class="btn btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        <a href="@Url.Action("CreateSubCategory", "AdminCategory", new { categoryId = category.CategoryID })" class="btn btn-success" title="Thêm danh mục con">
+                                            <i class="fas fa-plus-square"></i> <!-- Đổi icon cho dễ phân biệt -->
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Truyền dữ liệu Model sang JavaScript
+        var categoriesData = @Html.Raw(JsonSerializer.Serialize(Model, new JsonSerializerOptions {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles, // Đảm bảo using System.Text.Json.Serialization
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,  // Đảm bảo using System.Text.Json
+            WriteIndented = true // Cho dễ đọc JSON nếu debug, có thể bỏ qua trong production
+        }));
+
+        // Hàm để lấy danh mục con từ dữ liệu đã truyền
+        function getSubCategoriesFromModel(categoryId) {
+            if (!categoriesData) return [];
+            const category = categoriesData.find(cat => cat.categoryID === categoryId); // Giả sử thuộc tính ID là categoryID trong JSON
+            return category && category.subCategories ? category.subCategories : [];
+        }
+
+        // Hàm tạo HTML cho child row
+        function formatChildRowContent(subCategories, parentCategoryName) {
+            if (!subCategories || subCategories.length === 0) {
+                return '<div class="p-3 text-center text-muted">Không có danh mục con.</div>';
+            }
+
+            let subTableHtml = `
+                <div class="card card-body m-2 shadow-sm" style="background-color: #f9f9f9; border-left: 3px solid #007bff;">
+                    <h6 class="mb-3">Danh mục con của: <strong class="text-primary">${parentCategoryName}</strong></h6>
+                    <table class="table table-sm table-hover table-inner-bordered" style="font-size: 0.9em;">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Tên danh mục con</th>
+                                <th>Mô tả</th>
+                                <th class="text-center" style="width:120px;">Trạng thái</th>
+                                <th class="text-center" style="width:100px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+            subCategories.forEach(sub => {
+                const description = !sub.description ? '<i class="text-muted">Không có mô tả</i>' : (sub.description.length > 40 ? sub.description.substring(0, 40) + "..." : sub.description);
+                const statusBadge = sub.isActive
+                    ? '<span class="badge badge-success">Kích hoạt</span>'
+                    : '<span class="badge badge-danger">Vô hiệu</span>';
+                
+                const editUrl = `@Url.Action("EditSubCategory", "AdminCategory")/${sub.subCategoryID}`;
+                const deleteUrl = `@Url.Action("DeleteSubCategory", "AdminCategory")/${sub.subCategoryID}`;
+                subTableHtml += `
+                    <tr>
+                        <td>${sub.subCategoryName || 'N/A'}</td>
+                        <td>${description}</td>
+                        <td class="text-center">${statusBadge}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="${editUrl}" class="btn btn-info" title="Sửa danh mục con"><i class="fas fa-edit"></i></a>
+                                <a href="${deleteUrl}" class="btn btn-danger" title="Xóa danh mục con"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+
+            subTableHtml += '</tbody></table></div>';
+            return subTableHtml;
+        }
+
+        $(document).ready(function () {
+            var table = $('#categoriesTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": false, 
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+                },
+                "order": [[1, 'asc']], // Sắp xếp theo cột Tên danh mục (cột thứ 2, index 1)
+                "columns": [
+                    { // Cột 0: dt-control
+                        "className": 'dt-control',
+                        "orderable": false,
+                        "data": null, 
+                        "defaultContent": '', // Icon đã được render bởi Razor trong HTML
+                        "width": "30px"
+                    },
+                    null, // Cột 1: Tên danh mục
+                    null, // Cột 2: Mô tả
+                    { "width": "100px", "className": "text-center" }, // Cột 3: SL Con
+                    { "width": "120px", "className": "text-center" }, // Cột 4: Trạng thái
+                    { "orderable": false, "width": "150px", "className": "text-center" } // Cột 5: Thao tác
+                ]
+            });
+
+            $('#categoriesTable tbody').on('click', 'td.dt-control', function (e) {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+                var iconElement = $(this).find('i.fas');
+
+                var categoryId = parseInt(tr.data('category-id'));
+                
+                const categoryFromData = categoriesData.find(cat => cat.categoryID === categoryId); // Giả sử thuộc tính ID là categoryID
+                var categoryName = categoryFromData ? categoryFromData.categoryName : tr.find('td:nth-child(2)').text(); // Fallback
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    if (iconElement.length) iconElement.removeClass('fa-minus-circle text-danger').addClass('fa-plus-circle text-primary');
+                } else {
+                    var subCategories = getSubCategoriesFromModel(categoryId);
+                    if (subCategories && subCategories.length > 0) {
+                        row.child(formatChildRowContent(subCategories, categoryName)).show();
+                        tr.addClass('shown');
+                        if (iconElement.length) iconElement.removeClass('fa-plus-circle text-primary').addClass('fa-minus-circle text-danger');
+                    } else {
+                         // Nếu không có subcategories, có thể hiển thị một thông báo ngắn gọn trong child row
+                         row.child('<div class="p-3 text-center text-muted">Không có danh mục con để hiển thị.</div>').show();
+                         tr.addClass('shown'); // Vẫn add class shown để người dùng biết đã click
+                         // Không đổi icon nếu không có gì để "mở rộng" thực sự, hoặc đổi thành icon trung tính
+                         if (iconElement.length) iconElement.removeClass('fa-plus-circle text-primary').addClass('fa-info-circle text-secondary'); // Ví dụ: đổi thành icon info
+                    }
+                }
+            });
+        });
+    </script>
+    <style>
+        td.dt-control {
+            cursor: pointer;
+        }
+        td.dt-control i {
+            transition: transform 0.2s ease-in-out;
+        }
+        tr.shown td.dt-control i.fa-plus-circle {
+            transform: rotate(45deg);
+        }
+        tr.shown td.dt-control i.fa-minus-circle {
+            transform: rotate(0deg); /* Hoặc giữ nguyên nếu bạn thích */
+        }
+
+        .table-inner-bordered, 
+        .table-inner-bordered th, 
+        .table-inner-bordered td {
+            border: 1px solid #e9ecef; /* Màu border nhạt hơn */
+        }
+
+        .table-inner-bordered thead th {
+            border-bottom-width: 2px;
+            border-color: #dee2e6;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+}

@@ -1,0 +1,88 @@
+﻿@model CeramicShop.Models.Review
+@{
+    ViewData["Title"] = "Xóa đánh giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Xóa đánh giá</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Đánh giá</a></li>
+        <li class="breadcrumb-item active">Xóa</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Xác nhận xóa
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <h5><i class="fas fa-exclamation-circle mr-1"></i> Bạn có chắc chắn muốn xóa đánh giá này?</h5>
+                <p>Thao tác này không thể hoàn tác.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Sản phẩm</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Product != null)
+                            {
+                                <span>@Model.Product.ProductName</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Người dùng</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.User != null)
+                            {
+                                <div>@Model.User.FullName</div>
+                                <small class="text-muted">@Model.User.Email</small>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Đánh giá</dt>
+                        <dd class="col-sm-8">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Model.Rating)
+                                {
+                                    <i class="fas fa-star text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star text-warning"></i>
+                                }
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Ngày đánh giá</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fas fa-comment mr-1"></i>
+                    Nội dung đánh giá
+                </div>
+                <div class="card-body">
+                    <p>@Model.Comment</p>
+                </div>
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="ReviewID" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash mr-1"></i> Xác nhận xóa
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

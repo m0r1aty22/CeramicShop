@@ -1,0 +1,125 @@
+﻿@model CeramicShop.Models.Product
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết sản phẩm</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Sản phẩm</a></li>
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle mr-1"></i>
+            Thông tin sản phẩm
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên sản phẩm</dt>
+                        <dd class="col-sm-8">@Model.ProductName</dd>
+
+                        <dt class="col-sm-4">Danh mục</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.SubCategory != null)
+                            {
+                                <div>@Model.SubCategory.Category?.CategoryName</div>
+                                <small class="text-muted">@Model.SubCategory.SubCategoryName</small>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không có</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Giá</dt>
+                        <dd class="col-sm-8">@Model.Price.ToString("N0") VNĐ</dd>
+
+                        <dt class="col-sm-4">Tồn kho</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.StockQuantity <= 0)
+                            {
+                                <span class="badge badge-danger">Hết hàng</span>
+                            }
+                            else if (Model.StockQuantity < 5)
+                            {
+                                <span class="badge badge-warning">@Model.StockQuantity</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">@Model.StockQuantity</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge badge-success">Kích hoạt</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không kích hoạt</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Ngày tạo</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                    </dl>
+
+                    <h5 class="mt-4">Mô tả</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            @Html.Raw(Model.Description)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Hình ảnh sản phẩm</h5>
+                    @if (Model.ProductImages != null && Model.ProductImages.Any())
+                    {
+                        <div class="row">
+                            @foreach (var image in Model.ProductImages)
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <img src="@image.ImagePath" class="card-img-top" alt="@Model.ProductName">
+                                        <div class="card-footer text-center p-1">
+                                            @if (image.IsMainImage)
+                                            {
+                                                <span class="badge badge-success">Ảnh chính</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary">Ảnh phụ</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Chưa có ảnh nào.</p>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.ProductID" class="btn btn-primary">
+                    <i class="fas fa-edit mr-1"></i> Chỉnh sửa
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

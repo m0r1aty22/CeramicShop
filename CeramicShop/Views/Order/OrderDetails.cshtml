@@ -1,0 +1,185 @@
+﻿@model CeramicShop.Models.ViewModels.OrderViewModel
+
+@{
+    ViewBag.Title = "Chi tiết đơn hàng";
+}
+
+<div class="order-details-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Chi tiết đơn hàng</h1>
+        <div>
+            <a href="@Url.Action("TrackOrders", "Order")" class="btn btn-outline-primary me-2">
+                <i class="fas fa-arrow-left"></i> Quay lại đơn hàng
+            </a>
+            @if (Model.OrderStatus == "Pending" || Model.OrderStatus == "Confirmed")
+            {
+                <button class="btn btn-danger cancel-order-btn" data-order-id="@Model.OrderID" id="cancelOrderBtn">
+                    <i class="fas fa-times"></i> Hủy đơn hàng
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Đơn hàng #@Model.OrderID</h5>
+            @switch (Model.OrderStatus)
+            {
+                case "Pending":
+                    <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                    break;
+                case "Confirmed":
+                    <span class="badge bg-info">Đã xác nhận</span>
+                    break;
+                case "Shipped":
+                    <span class="badge bg-primary">Đang giao hàng</span>
+                    break;
+                case "Delivered":
+                    <span class="badge bg-success">Đã giao hàng</span>
+                    break;
+                case "Cancelled":
+                    <span class="badge bg-danger">Đã hủy</span>
+                    break;
+                default:
+                    <span class="badge bg-secondary">@Model.OrderStatus</span>
+                    break;
+            }
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Thông tin đơn hàng</h6>
+                    <p class="mb-1"><strong>Mã đơn hàng:</strong> #@Model.OrderID</p>
+                    <p class="mb-1"><strong>Ngày đặt:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
+                    <p class="mb-1"><strong>Tổng tiền:</strong> @Model.TotalAmount.ToString("N0") VNĐ</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Địa chỉ giao hàng</h6>
+                    <p>@Model.ShippingAddress</p>
+                </div>
+            </div>
+
+            <h6>Sản phẩm đặt mua</h6>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/Images/@item.ImagePath" alt="@item.ProductName" class="order-item-image me-2">
+                                        <span>@item.ProductName</span>
+                                    </div>
+                                </td>
+                                <td>@item.UnitPrice.ToString("N0") VNĐ</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.TotalPrice.ToString("N0") VNĐ</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                            <td><strong>@Model.TotalAmount.ToString("N0") VNĐ</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Trạng thái đơn hàng</h5>
+        </div>
+        <div class="card-body">
+            <div class="order-timeline">
+                <div class="timeline-item @(Model.OrderStatus != "Cancelled" ? "active" : "cancelled")">
+                    <div class="timeline-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h6>Đặt hàng</h6>
+                        <p class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
+                @if (Model.OrderStatus == "Cancelled")
+                {
+                    <div class="timeline-item cancelled">
+                        <div class="timeline-icon">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Đã hủy</h6>
+                            <p class="text-muted">Đơn hàng đã bị hủy</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="timeline-item @(Model.OrderStatus == "Confirmed" || Model.OrderStatus == "Shipped" || Model.OrderStatus == "Delivered" ? "active" : "")">
+                        <div class="timeline-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Xác nhận</h6>
+                            <p class="text-muted">@(Model.OrderStatus == "Confirmed" || Model.OrderStatus == "Shipped" || Model.OrderStatus == "Delivered" ? "Đơn hàng đã được xác nhận" : "Đang chờ xác nhận")</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item @(Model.OrderStatus == "Shipped" || Model.OrderStatus == "Delivered" ? "active" : "")">
+                        <div class="timeline-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Vận chuyển</h6>
+                            <p class="text-muted">@(Model.OrderStatus == "Shipped" || Model.OrderStatus == "Delivered" ? "Đơn hàng đang được vận chuyển" : "Đang chờ vận chuyển")</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item @(Model.OrderStatus == "Delivered" ? "active" : "")">
+                        <div class="timeline-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Giao hàng</h6>
+                            <p class="text-muted">@(Model.OrderStatus == "Delivered" ? "Đơn hàng đã được giao" : "Đang chờ giao hàng")</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Timeline animation
+            $('.timeline-item').each(function(index) {
+                var item = $(this);
+                setTimeout(function() {
+                    item.addClass('animate');
+                }, 300 * index);
+            });
+
+            // Log order ID for debugging
+            console.log("Order ID on page: @Model.OrderID");
+
+            // Check if cancel button exists
+            if ($("#cancelOrderBtn").length) {
+                console.log("Cancel button found with order ID: " + $("#cancelOrderBtn").data("order-id"));
+            } else {
+                console.log("Cancel button not found on page");
+            }
+        });
+    </script>
+}

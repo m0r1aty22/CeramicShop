@@ -1,0 +1,214 @@
+﻿@model IEnumerable<CeramicShop.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý sản phẩm</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item active">Sản phẩm</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-box mr-1"></i>
+                Danh sách sản phẩm
+            </div>
+            <div>
+                <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Thêm sản phẩm
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="filter-section mb-4">
+                <form method="get" action="@Url.Action("Index")">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm</label>
+                                <input type="text" class="form-control" name="searchString" value="@ViewBag.SearchString" placeholder="Tên sản phẩm...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Danh mục</label>
+                                <select class="form-control" name="categoryId" id="categorySelect">
+                                    <option value="">Tất cả</option>
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.CategoryID" selected=@(ViewBag.CategoryId==category.CategoryID ? "selected" : "" )>@category.CategoryName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Danh mục con</label>
+                                <select class="form-control" name="subCategoryId" id="SubCategoryID">
+                                    <option value="">Tất cả</option>
+                                    @foreach (var subCategory in ViewBag.SubCategories)
+                                    {
+                                        <option value="@subCategory.SubCategoryID" selected=@(ViewBag.SubCategoryId == subCategory.SubCategoryID ? "selected" : "")>@subCategory.SubCategoryName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Giá từ</label>
+                                <input type="number" class="form-control" name="minPrice" value="@ViewBag.MinPrice" placeholder="Giá từ...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Giá đến</label>
+                                <input type="number" class="form-control" name="maxPrice" value="@ViewBag.MaxPrice" placeholder="Giá đến...">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <select class="form-control" name="isActive">
+                                    <option value="">Tất cả</option>
+                                    <option value="true" selected=@(ViewBag.IsActive==true ? "selected" : "" )>Kích hoạt</option>
+                                    <option value="false" selected=@(ViewBag.IsActive == false ? "selected" : "")>Không kích hoạt</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search mr-1"></i> Tìm kiếm
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt mr-1"></i> Làm mới
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="productsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Giá</th>
+                            <th>Tồn kho</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @{
+                                        var mainImage = product.ProductImages?.FirstOrDefault(pi => pi.IsMainImage)?.ImagePath ?? "/Images/no-image.jpg";
+                                    }
+                                    <img src="~/Images/@mainImage" alt="@product.ProductName" class="image-preview" />
+                                </td>
+                                <td>@product.ProductName</td>
+                                <td>
+                                    @if (product.SubCategory != null)
+                                    {
+                                        <div>@product.SubCategory.Category?.CategoryName</div>
+                                        <small class="text-muted">@product.SubCategory.SubCategoryName</small>
+                                    }
+                                </td>
+                                <td>@product.Price.ToString("N0") VNĐ</td>
+                                <td>
+                                    @if (product.StockQuantity <= 0)
+                                    {
+                                        <span class="badge badge-danger">Hết hàng</span>
+                                    }
+                                    else if (product.StockQuantity < 5)
+                                    {
+                                        <span class="badge badge-warning">@product.StockQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">@product.StockQuantity</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (product.IsActive)
+                                    {
+                                        <span class="badge badge-success">Kích hoạt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Không kích hoạt</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Edit", new { id = product.ProductID })" class="btn btn-sm btn-info" data-toggle="tooltip" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Details", new { id = product.ProductID })" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Chi tiết">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", new { id = product.ProductID })" class="btn btn-sm btn-danger btn-delete" data-toggle="tooltip" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#productsTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+                }
+            });
+
+            // Xử lý khi chọn danh mục
+            $('#categorySelect').change(function() {
+                var categoryId = $(this).val();
+                if (categoryId) {
+                    $.ajax({
+                        url: '@Url.Action("GetSubCategories", "AdminProduct")',
+                        type: 'GET',
+                        data: { categoryId: categoryId },
+                        success: function(data) {
+                            var subCategorySelect = $('#SubCategoryID');
+                            subCategorySelect.empty();
+                            subCategorySelect.append('<option value="">Tất cả</option>');
+                            $.each(data, function(index, item) {
+                                subCategorySelect.append('<option value="' + item.id + '">' + item.name + '</option>');
+                            });
+                        }
+                    });
+                } else {
+                    $('#SubCategoryID').empty();
+                    $('#SubCategoryID').append('<option value="">Tất cả</option>');
+                }
+            });
+        });
+    </script>
+}

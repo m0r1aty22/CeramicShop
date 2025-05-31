@@ -1,0 +1,297 @@
+﻿@model CeramicShop.Models.Product
+
+@{
+    ViewData["Title"] = "Sản phẩm " + Model.ProductName;
+}
+
+<div class="container-wrapper">
+    @await Html.PartialAsync("_SidebarOverplay")
+    <div class="breadcrumb-container">
+        <div class="breadcrumb-icon d-inline-block">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <p>Xem chi tiết sản phẩm <b>#(@Model.ProductID)</b></p>
+    </div>
+
+    <div class="product-detail-container">
+        <div class="pdetail-left">
+            <!--Product Images-->
+            <div class="pimages">
+                <div class="main-swiper">
+                    <div class="swiper mySwiper">
+                        <div class="swiper-wrapper">
+                            @foreach (var image in Model.ProductImages)
+                            {
+                                <div class="swiper-slide">
+                                    <a href="#" data-fancybox="gallery">
+                                        <img src="~/Images/@image.ImagePath" />
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </div>
+
+                <div class="sub-swiper">
+                    <div class="swiper mySwiper2">
+                        <div class="swiper-wrapper">
+                            @foreach (var image in Model.ProductImages)
+                            {
+                                <div class="swiper-slide">
+                                    <img src="~/Images/@image.ImagePath" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Product Description-->
+            <div class="pdescription">
+                <p class="label">Thông tin sản phẩm</p>
+                <div class="divine"></div>
+                <br />
+                <p>@Model.Description</p>
+            </div>
+        </div>
+
+        <div class="pdetail-right">
+            <p class="pname">@Model.ProductName</p>
+            <div class="pshare" onclick="showShareMessage()"><i class="fa-solid fa-share-from-square pr-1"></i>Chia sẻ</div>
+
+            <form id="cartForm" action="@Url.RouteUrl("them-gio-hang", new { productId = Model.ProductID})" method="post">
+                <input type="hidden" name="ProductID" value="@Model.ProductID" />
+
+                <!--Quantity Controls-->
+                <div class="qty-controls">
+                    <p class="label">Số lượng:</p>
+                    <div>
+                        <button type="button" class="qtyminus" arla-hidden="true">&minus;</button>
+                        <input type="number" id="qty" name="quantity" min="1" max="@Model.StockQuantity" step="1" value="1" />
+                        <button type="button" class="qtyplus" aria-hidden="true">&plus;</button>
+                    </div>
+                </div>
+
+                <p class="kho">
+                    Còn <b><u>@Model.StockQuantity</u></b> sản phẩm
+                </p>
+
+                <!--Price Display-->
+                <div class="pprice-container">
+                    <p class="label">Giá:</p>
+                    <div class="price-controllers">
+                        <p class="price main-price"><b>@Model.Price.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) VNĐ</b></p>
+                    </div>
+                </div>
+                <div class="pprice-container">
+                    <p class="label">Tạm tính:</p>
+                    <div class="pprice-controllers">
+                        <p id="temporary-price" class="price main-price"><b>@Model.Price.ToString("N0") VNĐ</b></p>
+                    </div>
+                </div>
+
+                <!--Add Order-->
+                <div class="btn-controls">
+                    <button type="submit" class="pcart-btn">Mua Ngay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Chỉ để các hàm định nghĩa ở đây ---
+    function showShareMessage() {
+        const pshare = document.querySelector('.pshare');
+        // Thêm kiểm tra null cho pshare nếu cần
+        if (pshare) {
+            pshare.classList.add('active');
+            const productUrl = `${window.location.origin}/san-pham/${@Model.ProductID}`;
+
+            navigator.clipboard.writeText(productUrl)
+                .then(() => {
+                    console.log("Liên kết sản phẩm đã được sao chép!");
+                })
+                .catch(err => {
+                    console.error("Không thể sao chép liên kết: ", err);
+                });
+            setTimeout(() => {
+                pshare.classList.remove('active');
+            }, 3000);
+        } else {
+            console.warn("Element .pshare không tìm thấy.");
+        }
+    }
+
+    function toggleCategorySub(categoryMain) {
+        // Kiểm tra categoryMain và nextElementSibling nếu cần
+        var categorySubs = document.querySelectorAll('.category-sub');
+        categorySubs.forEach(function (sub) {
+            if (categoryMain && categoryMain.nextElementSibling && sub !== categoryMain.nextElementSibling) {
+                sub.style.display = "none";
+            }
+        });
+
+        if (categoryMain && categoryMain.nextElementSibling) {
+            var categorySub = categoryMain.nextElementSibling;
+            if (categorySub.style.display === "none" || categorySub.style.display === "") {
+                categorySub.style.display = "block";
+            } else {
+                categorySub.style.display = "none";
+            }
+        }
+    }
+
+
+    // --- Di chuyển TOÀN BỘ logic thao tác DOM vào đây ---
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // -- Quantity control Logic --
+        var input = document.querySelector('#qty');
+        var btnminus = document.querySelector('.qtyminus');
+        var btnplus = document.querySelector('.qtyplus');
+        var temporaryPriceDisplay = document.querySelector('#temporary-price');
+        var pricePerUnit = @Model.Price; // Giữ lại cái này vì giá trị từ Model
+
+        if (input && btnminus && btnplus && temporaryPriceDisplay) {
+            var min = Number(input.getAttribute('min'));
+            var max = Number(input.getAttribute('max'));
+            var step = Number(input.getAttribute('step'));
+
+            function updateTemporaryPrice() {
+                var quantity = Number(input.value);
+                // Đảm bảo quantity hợp lệ
+                if (quantity < min) quantity = min;
+                if (quantity > max) quantity = max;
+                input.value = quantity; // Cập nhật lại input nếu giá trị không hợp lệ
+
+                var totalPrice = pricePerUnit * quantity;
+                var formattedPrice = totalPrice.toLocaleString('vi-VN');
+                temporaryPriceDisplay.innerHTML = `<b>${formattedPrice} VNĐ</b>`;
+            }
+
+            function qtyminus(e) {
+                e.preventDefault(); // Nên đặt ở đầu
+                var current = Number(input.value);
+                var newval = (current - step);
+                if (newval < min) {
+                    newval = min;
+                }
+                input.value = Number(newval);
+                updateTemporaryPrice(); // Cập nhật giá sau khi thay đổi giá trị
+            }
+
+            function qtyplus(e) {
+                e.preventDefault(); // Nên đặt ở đầu
+                var current = Number(input.value);
+                var newval = (current + step);
+                if (newval > max) {
+                    newval = max;
+                }
+                input.value = Number(newval);
+                updateTemporaryPrice(); // Cập nhật giá sau khi thay đổi giá trị
+            }
+
+            updateTemporaryPrice(); // Initial calculation
+            btnminus.addEventListener('click', qtyminus);
+            btnplus.addEventListener('click', qtyplus);
+            input.addEventListener('input', updateTemporaryPrice); // Cập nhật khi người dùng nhập trực tiếp
+
+        } else {
+            console.warn("Một hoặc nhiều phần tử kiểm soát số lượng không tìm thấy.");
+        }
+
+
+        // -- Category Sidebar Toggle Logic (CHUYỂN VÀO ĐÂY) --
+        const categoryButton = document.querySelector('.category-button');
+        const overlay = document.getElementById('overlay');
+        const containerWrapper = document.querySelector('.container-wrapper');
+        const sidebar = document.querySelector('.sidebar');
+
+        // **** KIỂM TRA NULL QUAN TRỌNG ****
+        if (categoryButton && overlay && containerWrapper && sidebar) {
+            categoryButton.addEventListener('click', () => {
+                overlay.classList.add('d-block');
+                sidebar.classList.remove('d-none');
+                containerWrapper.classList.add('blur');
+            });
+
+            overlay.addEventListener('click', () => {
+                overlay.classList.remove('d-block');
+                sidebar.classList.add('d-none');
+                containerWrapper.classList.remove('blur');
+            });
+
+            // Logic mousemove này có thể cần xem lại - nó có thể đóng sidebar quá dễ dàng.
+            // Xem xét việc chỉ đóng khi click ra ngoài, hoặc di chuột ra khỏi cả overlay và sidebar.
+            overlay.addEventListener('mousemove', (event) => {
+                if (!sidebar.contains(event.target)) {
+                    overlay.classList.remove('d-block');
+                    sidebar.classList.add('d-none');
+                    containerWrapper.classList.remove('blur');
+                }
+            });
+            console.log("Sidebar event listeners attached.");
+        } else {
+            console.warn("Sidebar/Overlay elements not found on this page. Skipping sidebar event listeners.");
+        }
+
+
+        // -- KHỞI TẠO SWIPER CHÍNH XÁC CHO TRANG NÀY --
+        try { // Thêm try...catch để phòng lỗi
+            console.log("Attempting to initialize Swiper Thumbs...");
+            var swiperThumbs = new Swiper(".mySwiper2", { // Selector cho thumbs
+                spaceBetween: 10,
+                slidesPerView: 4,
+                freeMode: true,
+                watchSlidesProgress: true, // Quan trọng cho thumbs
+                breakpoints: {
+                    576: { slidesPerView: 5, spaceBetween: 8 },
+                    768: { slidesPerView: 6, spaceBetween: 10 },
+                    992: { slidesPerView: 5, spaceBetween: 10 },
+                    1200: { slidesPerView: 6, spaceBetween: 10 }
+                }
+            });
+            console.log("Swiper Thumbs initialized:", swiperThumbs);
+
+            console.log("Attempting to initialize Swiper Main...");
+            var swiperMain = new Swiper(".mySwiper", { // Selector cho main slider
+                spaceBetween: 10,
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                },
+                thumbs: {
+                    swiper: swiperThumbs, // Liên kết với swiperThumbs đã tạo
+                },
+                loop: false, // QUAN TRỌNG: loop: false khi dùng thumbs
+            });
+
+            console.log("Swiper Main initialized:", swiperMain);
+            if (swiperMain.params.thumbs && swiperMain.params.thumbs.swiper) {
+                console.log("Thumbs successfully linked in parameters.");
+            } else {
+                console.warn("Thumbs linking verification failed or swiperMain/params undefined.");
+            }
+        } catch (swiperError) {
+            console.error("Error initializing Swiper:", swiperError);
+        }
+
+
+        // -- KHỞI TẠO FANCYBOX (nếu dùng) --
+        if (typeof Fancybox !== 'undefined') {
+            try {
+                Fancybox.bind('[data-fancybox="gallery"]', {
+                    Toolbar: { display: ["zoom", "slideShow", "thumbs", "close"] },
+                    Thumbs: { type: "classic" }
+                });
+                console.log("Fancybox initialized.");
+            } catch (fancyboxError) {
+                console.error("Error initializing Fancybox:", fancyboxError);
+            }
+        } else {
+            console.warn("Fancybox library not found or not loaded yet.");
+        }
+
+    }); // --- KẾT THÚC DOMContentLoaded ---
+</script>

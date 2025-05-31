@@ -1,0 +1,83 @@
+﻿@model CeramicShop.Models.Promotion
+@{
+    ViewData["Title"] = "Xóa khuyến mãi";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Xóa khuyến mãi</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Khuyến mãi</a></li>
+        <li class="breadcrumb-item active">Xóa</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Xác nhận xóa
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <h5><i class="fas fa-exclamation-circle mr-1"></i> Bạn có chắc chắn muốn xóa khuyến mãi này?</h5>
+                <p>Thao tác này không thể hoàn tác.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên khuyến mãi</dt>
+                        <dd class="col-sm-8">@Model.PromotionName</dd>
+
+                        <dt class="col-sm-4">Mã khuyến mãi</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.PromoCode))
+                            {
+                                <span class="badge badge-info">@Model.PromoCode</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không có</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Sản phẩm</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Product != null)
+                            {
+                                <span>@Model.Product.ProductName</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">Toàn hệ thống</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Phần trăm giảm giá</dt>
+                        <dd class="col-sm-8">@Model.DiscountPercentage%</dd>
+
+                        <dt class="col-sm-4">Thời gian</dt>
+                        <dd class="col-sm-8">
+                            Từ: @Model.StartDate.ToString("dd/MM/yyyy")<br />
+                            Đến: @Model.EndDate.ToString("dd/MM/yyyy")
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="PromotionID" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash mr-1"></i> Xác nhận xóa
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

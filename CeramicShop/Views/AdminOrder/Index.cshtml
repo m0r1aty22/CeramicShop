@@ -1,0 +1,171 @@
+﻿@model IEnumerable<CeramicShop.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý đơn hàng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item active">Đơn hàng</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-shopping-cart mr-1"></i>
+            Danh sách đơn hàng
+        </div>
+        <div class="card-body">
+            <div class="filter-section mb-4">
+                <form method="get" action="@Url.Action("Index")">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm</label>
+                                <input type="text" class="form-control" name="searchString" value="@ViewBag.SearchString" placeholder="Mã đơn hàng, tên khách hàng...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <select name="status" class="form-control">
+                                    @{
+                                        string currentStatus = ViewBag.Status as string;
+                                    }
+
+                                    @if (string.IsNullOrEmpty(currentStatus))
+                                    {
+                                        <option value="" selected>Tất cả</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="">Tất cả</option>
+                                    }
+                                    @foreach(var statusItem in ViewBag.StatusList as List<string> ?? new List<string>()){
+                                        if(!string.IsNullOrEmpty(currentStatus) && currentStatus == statusItem)
+                                        {
+                                            <option value="@statusItem" selected>@statusItem</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@statusItem">@statusItem</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Từ ngày</label>
+                                <input type="date" class="form-control" name="fromDate" value="@ViewBag.FromDate">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <input type="date" class="form-control" name="toDate" value="@ViewBag.ToDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search mr-1"></i> Tìm kiếm
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt mr-1"></i> Làm mới
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="ordersTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Phương thức thanh toán</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày đặt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>@order.OrderID</td>
+                                <td>
+                                    @if (order.User != null)
+                                    {
+                                        <div>@order.User.FullName</div>
+                                        <small class="text-muted">@order.User.Email</small>
+                                    }
+                                </td>
+                                <td>@order.TotalAmount.ToString("N0") VNĐ</td>
+                                <td>@order.PaymentMethod?.MethodName</td>
+                                <td>
+                                    @switch (order.OrderStatus)
+                                    {
+                                        case "Pending":
+                                            <span class="badge badge-warning">Đang xử lý</span>
+                                            break;
+                                        case "Confirmed":
+                                            <span class="badge badge-info">Đã xác nhận</span>
+                                            break;
+                                        case "Shipped":
+                                            <span class="badge badge-primary">Đang giao</span>
+                                            break;
+                                        case "Delivered":
+                                            <span class="badge badge-success">Đã giao</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="badge badge-danger">Đã hủy</span>
+                                            break;
+                                        default:
+                                            <span class="badge badge-secondary">@order.OrderStatus</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Edit", new { id = order.OrderID })" class="btn btn-sm btn-info" data-toggle="tooltip" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Details", new { id = order.OrderID })" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Chi tiết">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#ordersTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+                }
+            });
+        });
+    </script>
+}

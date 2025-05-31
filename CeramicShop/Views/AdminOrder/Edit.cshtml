@@ -1,0 +1,145 @@
+﻿@model CeramicShop.Models.Order
+@{
+    ViewData["Title"] = "Cập nhật đơn hàng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Cập nhật đơn hàng #@Model.OrderID</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Đơn hàng</a></li>
+        <li class="breadcrumb-item active">Cập nhật</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-edit mr-1"></i>
+                    Cập nhật thông tin đơn hàng
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="OrderID" />
+                        <input type="hidden" asp-for="TotalAmount" />
+
+
+
+                        <div class="form-group">
+                            <label asp-for="UserID" class="control-label">Khách hàng</label>
+                            <select asp-for="UserID" class="form-control" asp-items="ViewBag.UserID" disabled></select>
+                            <input type="hidden" asp-for="UserID" />
+
+
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PaymentMethodID" class="control-label">Phương thức thanh toán</label>
+                            <select asp-for="PaymentMethodID" class="form-control" asp-items="ViewBag.PaymentMethodID"></select>
+                            <span asp-validation-for="PaymentMethodID" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="OrderStatus" class="control-label">Trạng thái đơn hàng</label>
+                            <select asp-for="OrderStatus" class="form-control" asp-items="ViewBag.OrderStatuses "></select>
+                            <span asp-validation-for="OrderStatus" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="ShippingAddress" class="control-label">Địa chỉ giao hàng</label>
+                            <textarea asp-for="ShippingAddress" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Notes" class="control-label">Ghi chú</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Lưu thay đổi
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.OrderID" class="btn btn-info">
+                                <i class="fas fa-info-circle mr-1"></i> Xem chi tiết
+                            </a>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Lưu ý quan trọng
+                </div>
+                <div class="card-body">
+                    <p>Khi thay đổi trạng thái đơn hàng:</p>
+                    <ul>
+                        <li>Nếu chuyển từ trạng thái <strong>Đã hủy</strong> sang trạng thái khác, số lượng sản phẩm trong kho sẽ <strong>giảm</strong>.</li>
+                        <li>Nếu chuyển từ trạng thái khác sang <strong>Đã hủy</strong>, số lượng sản phẩm trong kho sẽ <strong>tăng</strong>.</li>
+                    </ul>
+                    <p>Hãy đảm bảo rằng bạn thực hiện thao tác này một cách cẩn thận.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Thông tin đơn hàng
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Mã đơn hàng</dt>
+                        <dd class="col-sm-6">@Model.OrderID</dd>
+
+                        <dt class="col-sm-6">Ngày đặt</dt>
+                        <dd class="col-sm-6">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-6">Tổng tiền</dt>
+                        <dd class="col-sm-6">@Model.TotalAmount.ToString("N0") VNĐ</dd>
+
+                        <dt class="col-sm-6">Trạng thái hiện tại</dt>
+                        <dd class="col-sm-6">
+                            @switch (Model.OrderStatus)
+                            {
+                                case "Pending":
+                                    <span class="badge badge-warning">Đang xử lý</span>
+                                    break;
+                                case "Confirmed":
+                                    <span class="badge badge-info">Đã xác nhận</span>
+                                    break;
+                                case "Shipped":
+                                    <span class="badge badge-primary">Đang giao</span>
+                                    break;
+                                case "Delivered":
+                                    <span class="badge badge-success">Đã giao</span>
+                                    break;
+                                case "Cancelled":
+                                    <span class="badge badge-danger">Đã hủy</span>
+                                    break;
+                                default:
+                                    <span class="badge badge-secondary">@Model.OrderStatus</span>
+                                    break;
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

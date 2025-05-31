@@ -1,0 +1,469 @@
+﻿/* Styles for admin layout */
+:root {
+    --header-height: 60px;
+    --sidebar-width: 225px;
+    --sidebar-transition-duration: 0.25s;
+}
+
+body {
+    transition: padding-left var(--sidebar-transition-duration) ease-in-out;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* Font chữ mặc định của Bootstrap */
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+}
+
+/* Header cố định */
+.sb-nav-fixed .sb-topnav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1039;
+    height: var(--header-height);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Layout chính sau header */
+.sb-nav-fixed #layoutSidenav {
+    padding-top: var(--header-height); /* Đẩy layout xuống dưới header */
+    display: flex;
+}
+
+    /* Sidebar */
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_nav {
+        width: var(--sidebar-width);
+        height: calc(100vh - var(--header-height)); /* Chiều cao sidebar = chiều cao màn hình - chiều cao header */
+        position: fixed;
+        top: var(--header-height); /* Nằm ngay dưới header */
+        left: 0;
+        z-index: 1038; /* Thấp hơn header một chút */
+        transition: transform var(--sidebar-transition-duration) ease-in-out, width var(--sidebar-transition-duration) ease-in-out;
+        flex-basis: var(--sidebar-width); /* Kích thước cơ sở */
+        flex-shrink: 0; /* Không co lại */
+    }
+
+    /* Nội dung chính */
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        position: relative;
+        padding-left: var(--sidebar-width); /* Padding ban đầu bằng chiều rộng sidebar */
+        margin-left: 0;
+        flex-grow: 1; /* Chiếm hết không gian còn lại */
+        min-height: calc(100vh - var(--header-height));
+        transition: padding-left var(--sidebar-transition-duration) ease-in-out;
+        display: flex;
+        flex-direction: column; /* Để footer dính xuống dưới */
+        background-color: #f8f9fa; /* Màu nền cho content area */
+    }
+
+/* Khi sidebar được ẩn (toggled) */
+.sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+    transform: translateX(calc(var(--sidebar-width) * -1)); /* Di chuyển sidebar ra khỏi màn hình */
+}
+
+.sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
+    padding-left: 0; /* Content chiếm toàn bộ chiều rộng */
+}
+
+/* Main content area bên trong layoutSidenav_content */
+#layoutSidenav #layoutSidenav_content main {
+    flex-grow: 1; /* Main content chiếm không gian linh hoạt */
+    padding: 1.5rem; /* Padding cho nội dung */
+}
+
+/* Footer bên trong layoutSidenav_content */
+#layoutSidenav #layoutSidenav_content footer {
+    flex-shrink: 0; /* Footer không co lại */
+    padding: 1rem 1.5rem; /* Padding cho footer */
+    background-color: #e9ecef; /* Màu nền cho footer */
+    border-top: 1px solid #dee2e6;
+}
+
+/* Cấu trúc chung của Sidebar */
+.sb-sidenav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-wrap: nowrap;
+}
+
+    .sb-sidenav .sb-sidenav-menu {
+        flex-grow: 1;
+        overflow-y: auto; /* Cho phép cuộn nếu menu dài */
+    }
+
+        .sb-sidenav .sb-sidenav-menu .nav {
+            flex-direction: column;
+            flex-wrap: nowrap;
+        }
+
+            .sb-sidenav .sb-sidenav-menu .nav .sb-sidenav-menu-heading {
+                padding: 1.75rem 1rem 0.75rem;
+                font-size: 0.75rem;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .sb-sidenav .sb-sidenav-menu .nav .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem 1rem; /* Điều chỉnh padding cho nav-link */
+                position: relative;
+                text-decoration: none; /* Bỏ gạch chân mặc định */
+            }
+
+                .sb-sidenav .sb-sidenav-menu .nav .nav-link .sb-nav-link-icon {
+                    font-size: 0.9rem;
+                    margin-right: 0.5rem; /* Khoảng cách giữa icon và text */
+                }
+
+                .sb-sidenav .sb-sidenav-menu .nav .nav-link .sb-sidenav-collapse-arrow {
+                    display: inline-block;
+                    margin-left: auto;
+                    transition: transform 0.15s ease;
+                }
+
+                .sb-sidenav .sb-sidenav-menu .nav .nav-link.collapsed .sb-sidenav-collapse-arrow {
+                    transform: rotate(-90deg);
+                }
+
+            .sb-sidenav .sb-sidenav-menu .nav .sb-sidenav-menu-nested {
+                margin-left: 1.5rem; /* Thụt vào cho menu con */
+                flex-direction: column;
+                list-style: none; /* Bỏ dấu chấm đầu dòng */
+                padding-left: 0; /* Bỏ padding mặc định của ul/ol */
+            }
+
+                .sb-sidenav .sb-sidenav-menu .nav .sb-sidenav-menu-nested .nav-link {
+                    padding-left: 1rem; /* Điều chỉnh padding cho menu con */
+                }
+
+
+    .sb-sidenav .sb-sidenav-footer {
+        padding: 0.75rem 1rem; /* Điều chỉnh padding */
+        flex-shrink: 0;
+        text-align: center; /* Căn giữa nội dung footer của sidebar */
+    }
+
+/* Sidebar màu tối (Dark theme) */
+.sb-sidenav-dark {
+    background-color: #212529; /* Màu nền chính của sidebar */
+    color: rgba(255, 255, 255, 0.65); /* Màu chữ mặc định cho text trong sidebar */
+}
+
+    .sb-sidenav-dark .sb-sidenav-menu .sb-sidenav-menu-heading {
+        color: rgba(255, 255, 255, 0.4); /* Màu cho heading */
+    }
+
+    .sb-sidenav-dark .sb-sidenav-menu .nav-link {
+        color: rgba(255, 255, 255, 0.65); /* Màu chữ cho link */
+    }
+
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-nav-link-icon {
+            color: rgba(255, 255, 255, 0.4); /* Màu cho icon */
+        }
+
+        /* Khi hover hoặc active */
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link:hover,
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link.active {
+            color: #fff; /* Màu chữ sáng hơn khi active/hover */
+        }
+
+            .sb-sidenav-dark .sb-sidenav-menu .nav-link.active .sb-nav-link-icon,
+            .sb-sidenav-dark .sb-sidenav-menu .nav-link:hover .sb-nav-link-icon {
+                color: #fff; /* Màu icon sáng hơn khi active/hover */
+            }
+
+    .sb-sidenav-dark .sb-sidenav-footer {
+        background-color: #343a40; /* Màu nền cho footer của sidebar */
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+/* Logo trong Admin Header */
+.navbar-brand-wrapper {
+    position: relative;
+    margin-right: 1rem; /* Khoảng cách với các thành phần khác */
+    /* Thêm để đảm bảo wrapper đủ không gian cho text ADMIN không bị logo đẩy */
+    /* Bạn có thể cần điều chỉnh padding-left này dựa trên kích thước logo */
+    padding-left: 40px; /* Ví dụ: tạo không gian cho phần logo bên trái */
+}
+
+/* Navbar Brand (Link chứa logo và text ADMIN) */
+.sb-topnav .navbar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #fff;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
+    height: var(--header-height);
+    position: relative; /* Quan trọng để z-index của span bên trong có tác dụng */
+    /* z-index không cần ở đây, mà cần ở span chứa text */
+}
+
+    .sb-topnav .navbar-brand:hover {
+        color: #f8f9fa;
+    }
+    /* CSS cho text "ADMIN" */
+    .sb-topnav .navbar-brand span {
+        position: relative; /* Để z-index có tác dụng */
+        z-index: 10; /* Đặt z-index cao hơn logo */
+        /* Thêm một chút margin-left nếu logo mới quá sát text */
+        /* margin-left: 5px; */
+    }
+
+/* Logo được phóng to và có thể tràn */
+.admin-logo-enlarged {
+    position: absolute;
+    width: 190px; /* KÍCH THƯỚC MỚI CỦA BẠN */
+    height: auto;
+    /* Điều chỉnh vị trí của logo sao cho hợp lý với kích thước mới */
+    /* Ví dụ: logo sẽ bắt đầu từ cạnh trái của wrapper và căn giữa theo chiều dọc */
+    top: 50%;
+    left: -70px; /* Đẩy logo mạnh sang trái để phần chính giữa của logo nằm gần text ADMIN */
+    /* Bạn cần điều chỉnh giá trị này cho đến khi ưng ý */
+    /* Ví dụ: nếu wrapper có padding-left: 40px, và logo rộng 180px,
+                     để phần bên phải của logo không che text, left có thể cần là -(180/2 - 40) hoặc tương tự */
+    transform: translateY(-50%);
+    z-index: 1; /* z-index thấp hơn text ADMIN (có z-index: 10) */
+    object-fit: contain;
+    padding-left: 20px;
+}
+
+/* Nút toggle sidebar trên header */
+.sb-topnav #sidebarToggle {
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0 0.75rem;
+    position: relative;
+    z-index: 11; /* Đảm bảo nút toggle nằm trên logo và text admin */
+}
+
+    .sb-topnav #sidebarToggle:hover {
+        color: #fff;
+    }
+
+/* Navbar Brand */
+.sb-topnav .navbar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #fff;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-right: 1rem; /* Khoảng cách với các item khác */
+}
+
+    .sb-topnav .navbar-brand:hover {
+        color: #f8f9fa;
+    }
+
+/* Navbar Search */
+.sb-topnav .form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+    .sb-topnav .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .sb-topnav .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: #fff;
+        box-shadow: none;
+    }
+
+.sb-topnav .btn-primary { /* Nút search */
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Navbar User Dropdown */
+.sb-topnav .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+    .sb-topnav .navbar-nav .nav-link:hover {
+        color: #fff;
+    }
+
+.sb-topnav .dropdown-menu {
+    background-color: #343a40; /* Nền dropdown */
+    border: 1px solid rgba(0,0,0,.15);
+}
+
+.sb-topnav .dropdown-item {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+    .sb-topnav .dropdown-item:hover,
+    .sb-topnav .dropdown-item:focus {
+        color: #fff;
+        background-color: #495057;
+    }
+
+.sb-topnav .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+/* Custom styles for admin pages content (Ví dụ) */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.image-preview {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+    border: 1px solid #ddd;
+    padding: 2px;
+    border-radius: .25rem;
+    background-color: #fff;
+}
+
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-preview-item {
+    position: relative;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+
+    .image-preview-item img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 3px;
+    }
+
+    .image-preview-item .badge { /* Ví dụ: badge "Ảnh chính" */
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 0.7rem;
+    }
+
+    .image-preview-item .main-image-badge { /* Style riêng cho badge ảnh chính nếu cần */
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background-color: #28a745;
+        color: white;
+        padding: 2px 5px;
+        font-size: 0.65rem;
+        border-radius: 3px;
+    }
+
+    .image-preview-item .btn-sm { /* Nút xóa ảnh preview */
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        opacity: 0.8;
+    }
+
+        .image-preview-item .btn-sm:hover {
+            opacity: 1;
+        }
+
+
+.filter-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.dashboard-card {
+    transition: all 0.3s ease-in-out;
+    border: 1px solid #dee2e6;
+}
+
+    .dashboard-card .card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dashboard-card .card-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .dashboard-card .card-text {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+
+/* Alert messages styling */
+.alert {
+    margin: 1rem 1.5rem; /* Canh lề cho alert trong main content */
+}
+
+/* Container chung cho các ô ảnh */
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Khoảng cách giữa các ô */
+    margin-top: 0.5rem;
+}
+
+/* Mỗi ô ảnh bao gồm thumbnail + radio + checkbox */
+.image-preview-item {
+    width: 120px; /* Chiều ngang cố định */
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+    /* Ảnh thu nhỏ */
+    .image-preview-item img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Nhóm radio + nhãn "Chính" */
+    .image-preview-item .form-check-inline {
+        margin-bottom: 0.3rem;
+    }
+
+    /* Checkbox Xóa */
+    .image-preview-item .form-check {
+        margin-bottom: 0.3rem;
+    }
+
+    /* Đổi màu nhãn Xóa để nổi bật */
+    .image-preview-item .form-check-label {
+        color: #c9302c; /* Bootstrap’s danger color */
+    }
+
+    /* Khi hover ô ảnh, highlight nhẹ */
+    .image-preview-item:hover {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 0.3rem;
+    }

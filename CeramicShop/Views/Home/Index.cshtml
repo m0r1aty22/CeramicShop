@@ -1,0 +1,380 @@
+﻿@model CeramicShop.Models.ViewModels.HomeViewModel
+@using CeramicShop.Models
+@using System.Text.Encodings.Web
+
+@{
+    ViewBag.Title = "Trang chủ - Cửa hàng gốm sứ CeramicShop";
+    var minPrice = ViewBag.MinPrice ?? 0;
+    var maxPrice = ViewBag.MaxPrice ?? 10000000;
+    var currentSort = ViewBag.CurrentSort ?? "";
+    var searchTerm = ViewBag.SearchTerm ?? "";
+    var selectedCategoryId = ViewBag.CategoryIdHome;
+    var selectedSubCategoryId = ViewBag.SubCategoryIdHome;
+
+    var isDefaultSort = currentSort == "";
+    var isPriceAscSort = currentSort == "price_asc";
+    var isPriceDescSort = currentSort == "price_desc";
+    var isNameAscSort = currentSort == "name_asc";
+    var isNameDescSort = currentSort == "name_desc";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Categories & Price Filter -->
+        <div class="col-lg-3">
+            <div class="card category-sidebar mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Danh mục</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <div class="category-item">
+                            <a href="@Url.Action("Index", "Product", new { categoryId = category.CategoryID, sortOrder = currentSort, minPrice = (ViewBag.MinPriceQuery ?? 0), maxPrice = (ViewBag.MaxPriceQuery ?? 10000000), searchTerm })"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(selectedCategoryId != null && selectedCategoryId == category.CategoryID ? "fw-bold" : "")">
+                                @category.CategoryName
+                                @if (Model.SubCategoriesByCategory.ContainsKey(category.CategoryID) && Model.SubCategoriesByCategory[category.CategoryID].Any())
+                                {
+                                    <i class="fas fa-chevron-right category-toggle-icon"></i>
+                                }
+                            </a>
+                            @if (Model.SubCategoriesByCategory.ContainsKey(category.CategoryID) && Model.SubCategoriesByCategory[category.CategoryID].Any())
+                            {
+                                <div class="subcategory-list" style="@((selectedCategoryId != null && selectedCategoryId == category.CategoryID) ? "display: block;" : "display: none;")">
+                                    @foreach (var subCategory in Model.SubCategoriesByCategory[category.CategoryID])
+                                    {
+                                        <a href="@Url.Action("Index", "Product", new { subCategoryId = subCategory.SubCategoryID, sortOrder = currentSort, minPrice = (ViewBag.MinPriceQuery ?? 0), maxPrice = (ViewBag.MaxPriceQuery ?? 10000000), searchTerm })"
+                                           class="list-group-item list-group-item-action subcategory-item @(selectedSubCategoryId != null && selectedSubCategoryId == subCategory.SubCategoryID ? "fw-bold" : "")">
+                                            @subCategory.SubCategoryName
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Lọc theo giá</h5>
+                </div>
+                <div class="card-body">
+                    <form id="priceFilterFormHome" method="get" action="@Url.Action("Index", "Home")">
+                        @if (selectedCategoryId != null)
+                        {
+                            <input type="hidden" name="categoryId" value="@selectedCategoryId" />
+                        }
+                        @if (selectedSubCategoryId != null)
+                        {
+                            <input type="hidden" name="subCategoryId" value="@selectedSubCategoryId" />
+                        }
+                        @if (!string.IsNullOrEmpty(currentSort))
+                        {
+                            <input type="hidden" name="sortOrder" value="@currentSort" />
+                        }
+                        @if (!string.IsNullOrEmpty(searchTerm))
+                        {
+                            <input type="hidden" name="searchTerm" value="@searchTerm" />
+                        }
+                        <div class="mb-3">
+                            <label for="minPriceInputHome" class="form-label">Giá tối thiểu</label>
+                            <input type="number" class="form-control" id="minPriceInputHome" name="minPrice" value="@minPrice" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxPriceInputHome" class="form-label">Giá tối đa</label>
+                            <input type="number" class="form-control" id="maxPriceInputHome" name="maxPrice" value="@maxPrice" min="0">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Áp dụng</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Hero Banner -->
+            <div class="hero-banner mb-4">
+                <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+                    </div>
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="~/Images/banner1.jpg" class="d-block w-100" alt="Banner 1">
+                            <div class="carousel-caption">
+                                <h2>Chào mừng đến với CeramicShop</h2>
+                                <p>Khám phá bộ sưu tập gốm sứ thủ công tinh xảo</p>
+                                <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Mua sắm ngay</a>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="~/Images/banner2.jpg" class="d-block w-100" alt="Banner 2">
+                            <div class="carousel-caption">
+                                <h2>Sản phẩm gốm mới</h2>
+                                <p>Khám phá các sản phẩm gốm sứ mới nhất của chúng tôi</p>
+                                <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Khám phá</a>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="~/Images/banner3.jpg" class="d-block w-100" alt="Banner 3">
+                            <div class="carousel-caption">
+                                <h2>Ưu đãi gốm sứ đặc biệt</h2>
+                                <p>Giảm giá có thời hạn cho các sản phẩm gốm sứ được chọn</p>
+                                <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Xem ưu đãi</a>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Trước</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Tiếp</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end align-items-center mb-4">
+                <form id="sortFormHome" method="get" action="@Url.Action("Index", "Home")" class="d-flex align-items-center">
+                    @if (selectedCategoryId != null)
+                    {
+                        <input type="hidden" name="categoryId" value="@selectedCategoryId" />
+                    }
+                    @if (selectedSubCategoryId != null)
+                    {
+                        <input type="hidden" name="subCategoryId" value="@selectedSubCategoryId" />
+                    }
+                    @if (minPrice > 0)
+                    {
+                        <input type="hidden" name="minPrice" value="@minPrice" />
+                    }
+                    @if (maxPrice < 10000000)
+                    {
+                        <input type="hidden" name="maxPrice" value="@maxPrice" />
+                    }
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <input type="hidden" name="searchTerm" value="@searchTerm" />
+                    }
+                    <label class="me-2" for="sortOrderHome">Sắp xếp:</label>
+                    <select id="sortOrderHome" name="sortOrder" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                        <option value="" selected="@isDefaultSort">Mới nhất</option>
+                        <option value="price_asc" selected="@isPriceAscSort">Giá tăng dần</option>
+                        <option value="price_desc" selected="@isPriceDescSort">Giá giảm dần</option>
+                        <option value="name_asc" selected="@isNameAscSort">Tên A-Z</option>
+                        <option value="name_desc" selected="@isNameDescSort">Tên Z-A</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- Featured Products -->
+            <div class="section-title"><h2>Sản phẩm gốm sứ nổi bật</h2></div>
+            <div id="productsGridFeatured" class="row product-grid-view">
+                @if (Model.FeaturedProducts != null && Model.FeaturedProducts.Any())
+                {
+                    foreach (var product in Model.FeaturedProducts)
+                    {
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <div class="card product-card h-100">
+                                <div class="product-image">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.ProductID })">
+                                        <img src="/Images/@product.MainImagePath" alt="@product.ProductName" class="card-img-top">
+                                    </a>
+                                    @if (product.DiscountPercentage.HasValue && product.DiscountPercentage > 0 && product.HasSpecificPromotion)
+                                    {
+                                        <div class="discount-badge">-@product.DiscountPercentage%</div>
+                                    }
+                                </div>
+                                <div class="card-body product-info">
+                                    <h5 class="card-title product-title"><a href="@Url.Action("Details", "Product", new { id = product.ProductID })">@product.ProductName</a></h5>
+                                    <div class="product-category">@product.CategoryName / @product.SubCategoryName</div>
+                                    <div class="product-price mt-2">
+                                        @if (product.DiscountedPrice.HasValue && product.DiscountedPrice < product.Price && product.HasSpecificPromotion)
+                                        {
+                                            <span class="original-price">@product.Price.ToString("N0") VNĐ</span>
+                                            <span class="current-price">@product.DiscountedPrice.Value.ToString("N0") VNĐ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="current-price">@product.Price.ToString("N0") VNĐ</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-primary btn-sm add-to-cart" data-product-id="@product.ProductID" data-product-name="@product.ProductName">
+                                            <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                                        </button>
+                                        @{
+                                            string wishlistBtnClass = product.IsInUserWishlist ? "active-wishlist" : "";
+                                            string heartIcnClass = product.IsInUserWishlist ? "fas" : "far";
+                                        }
+                                        <button class="btn btn-outline-danger btn-sm btn-wishlist @wishlistBtnClass"
+                                                data-product-id="@product.ProductID"
+                                                data-product-name="@product.ProductName"
+                                                data-ajax-url="@Url.Action("ToggleWishlist", "Wishlist")"
+                                                data-login-url="@Url.Action("Login", "Account")"
+                                                data-is-wishlisted="@product.IsInUserWishlist.ToString().ToLower()">
+                                            <i class="@heartIcnClass fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12"><p>Không có sản phẩm gốm sứ nổi bật nào.</p></div>
+                }
+            </div>
+
+            <!-- New Arrivals -->
+            <div class="section-title mt-5"><h2>Sản phẩm gốm sứ mới</h2></div>
+            <div id="productsGridNewArrivals" class="row product-grid-view">
+                @if (Model.NewArrivals != null && Model.NewArrivals.Any())
+                {
+                    foreach (var product in Model.NewArrivals)
+                    {
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <div class="card product-card h-100">
+                                <div class="product-image">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.ProductID })">
+                                        <img src="/Images/@product.MainImagePath" alt="@product.ProductName" class="card-img-top">
+                                    </a>
+                                    <div class="new-badge">Mới</div>
+                                    @if (product.DiscountPercentage.HasValue && product.DiscountPercentage > 0 && product.HasSpecificPromotion)
+                                    {
+                                        <div class="discount-badge" style="right: auto; left:10px; top: 40px;">-@product.DiscountPercentage%</div>
+                                    }
+                                </div>
+                                <div class="card-body product-info">
+                                    <h5 class="card-title product-title"><a href="@Url.Action("Details", "Product", new { id = product.ProductID })">@product.ProductName</a></h5>
+                                    <div class="product-category">@product.CategoryName / @product.SubCategoryName</div>
+                                    <div class="product-price mt-2">
+                                        @if (product.DiscountedPrice.HasValue && product.DiscountedPrice < product.Price && product.HasSpecificPromotion)
+                                        {
+                                            <span class="original-price">@product.Price.ToString("N0") VNĐ</span>
+                                            <span class="current-price">@product.DiscountedPrice.Value.ToString("N0") VNĐ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="current-price">@product.Price.ToString("N0") VNĐ</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-primary btn-sm add-to-cart" data-product-id="@product.ProductID" data-product-name="@product.ProductName">
+                                            <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                                        </button>
+                                        @{
+                                            string wishlistBtnClass = product.IsInUserWishlist ? "active-wishlist" : "";
+                                            string heartIcnClass = product.IsInUserWishlist ? "fas" : "far";
+                                        }
+                                        <button class="btn btn-outline-danger btn-sm btn-wishlist @wishlistBtnClass"
+                                                data-product-id="@product.ProductID"
+                                                data-product-name="@product.ProductName"
+                                                data-ajax-url="@Url.Action("ToggleWishlist", "Wishlist")"
+                                                data-login-url="@Url.Action("Login", "Account")"
+                                                data-is-wishlisted="@product.IsInUserWishlist.ToString().ToLower()">
+                                            <i class="@heartIcnClass fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12"><p>Chưa có sản phẩm gốm sứ mới.</p></div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('.category-item > a').on('click', function (e) {
+                var $this = $(this);
+                var $nextSubcategoryList = $this.next('.subcategory-list');
+                var $icon = $this.find('.category-toggle-icon');
+
+                if ($nextSubcategoryList.length > 0) {
+                    e.preventDefault();
+                } else {
+                    return;
+                }
+
+                $('.subcategory-list').not($nextSubcategoryList).slideUp();
+                $this.closest('.list-group-flush').find('.category-item > a').not($this)
+                        .find('.category-toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-right');
+
+                $nextSubcategoryList.slideToggle(function() {
+                    if ($nextSubcategoryList.is(':visible')) {
+                        $icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+                    } else {
+                        $icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+                    }
+                });
+            });
+
+            var homeSelectedCategoryId = @(selectedCategoryId != null ? Json.Serialize(selectedCategoryId) : "null");
+            if (homeSelectedCategoryId !== null) {
+                $('.category-item > a').each(function() {
+                    var $link = $(this);
+                    var linkHref = $link.attr('href');
+                     try {
+                        if (linkHref && new URLSearchParams(new URL(window.location.origin + linkHref).search).get('categoryId') == homeSelectedCategoryId.toString()) {
+                            $link.next('.subcategory-list').show();
+                            $link.find('.category-toggle-icon').removeClass('fa-chevron-right').addClass('fa-chevron-down');
+                        }
+                    } catch (e) { console.error("Error parsing URL for category matching on home: ", e, linkHref); }
+                });
+            }
+
+            $('.add-to-cart').click(function () {
+                var productId = $(this).data('product-id');
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Cart")',
+                    type: 'POST',
+                    data: { productId: productId, quantity: 1 },
+                    success: function (data) {
+                        if (data.success) {
+                            if (data.cartCount !== undefined) {
+                                $('.cart-count').text(data.cartCount);
+                                var cartCountElement = $('.cart-count');
+                                cartCountElement.addClass('cart-pulse');
+                                setTimeout(function() {
+                                    cartCountElement.removeClass('cart-pulse');
+                                }, 500);
+                            }
+                        } else {
+                            if (window.showNotification) {
+                                window.showNotification(data.message || 'Không thể thêm sản phẩm.', 'danger');
+                            } else {
+                                alert(data.message || 'Không thể thêm sản phẩm.');
+                            }
+                        }
+                    },
+                    error: function () {
+                        if (window.showNotification) {
+                            window.showNotification('Lỗi khi thêm sản phẩm vào giỏ hàng.', 'danger');
+                        } else {
+                             alert('Lỗi khi thêm sản phẩm vào giỏ hàng.');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

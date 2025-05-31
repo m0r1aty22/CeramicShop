@@ -1,0 +1,649 @@
+﻿@model CeramicShop.Models.ViewModels.ProductViewModel
+
+@{
+    ViewBag.Title = Model.ProductName;
+}
+
+<div class="product-details-container">
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-md-6">
+            <div class="product-images">
+                <div class="main-image-container">
+                    <img id="mainImage" src="/Images/@Model.MainImagePath" alt="@Model.ProductName" class="img-fluid main-image product-image-zoom" data-zoom-image="/Images/@Model.MainImagePath">
+                </div>
+                <div class="thumbnail-container mt-3">
+                    <div class="row">
+                        <div class="col-3">
+                            <img src="/Images/@Model.MainImagePath" alt="@Model.ProductName" class="img-fluid thumbnail active" onclick="changeMainImage(this.src)">
+                        </div>
+                        @foreach (var image in Model.AdditionalImages)
+                        {
+                            <div class="col-3">
+                                <img src="/Images/@image" alt="@Model.ProductName" class="img-fluid thumbnail" onclick="changeMainImage(this.src)">
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <div class="product-info">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Product")">Sản phẩm</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Product", new { categoryName = Model.CategoryName })">@Model.CategoryName</a></li>
+                        <li class="breadcrumb-item active">@Model.ProductName</li>
+                    </ol>
+                </nav>
+
+                <h1 class="product-title">@Model.ProductName</h1>
+                <div class="product-category">
+                    <span>Danh mục: </span>
+                    <a href="@Url.Action("Index", "Product", new { categoryName = Model.CategoryName })">@Model.CategoryName</a> /
+                    <a href="@Url.Action("Index", "Product", new { subCategoryId = Model.SubCategoryID })">@Model.SubCategoryName</a>
+                </div>
+
+                <div class="product-price mt-3">
+                    @if (Model.DiscountPercentage.HasValue)
+                    {
+                        <div class="discount-badge">-@Model.DiscountPercentage%</div>
+                        <span class="original-price">@Model.Price.ToString("N0") VNĐ</span>
+                        <span id="productPrice" class="current-price" data-price="@Model.Price" data-discounted-price="@Model.DiscountedPrice">@Model.DiscountedPrice.Value.ToString("N0") VNĐ</span>
+                    }
+                    else
+                    {
+                        <span id="productPrice" class="current-price" data-price="@Model.Price">@Model.Price.ToString("N0") VNĐ</span>
+                    }
+                </div>
+
+                <div class="product-stock mt-3">
+                    @if (Model.StockQuantity > 0)
+                    {
+                        <span class="in-stock"><i class="fas fa-check-circle"></i> Còn hàng (@Model.StockQuantity sản phẩm)</span>
+                    }
+                    else
+                    {
+                        <span class="out-of-stock"><i class="fas fa-times-circle"></i> Hết hàng</span>
+                    }
+                </div>
+
+                <div class="product-description mt-4">
+                    <h5>Mô tả</h5>
+                    <p>@Model.Description</p>
+                </div>
+
+                <div class="product-actions mt-4">
+                    <div class="quantity-selector">
+                        <label for="quantity">Số lượng:</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" id="decreaseQuantity">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity">
+                            <button class="btn btn-outline-secondary" type="button" id="increaseQuantity">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <p>Tổng: <span id="totalPrice" class="fw-bold"></span></p>
+                    </div>
+
+                    <div class="action-buttons mt-3">
+                        <button id="addToCartBtnDetails" @* Đổi ID để không bị trùng selector nếu có global .add-to-cart handler *@
+                                class="btn btn-primary btn-lg add-to-cart" @* class add-to-cart để site.js bắt được*@
+                                data-product-id="@Model.ProductID"
+                                data-product-name="@Model.ProductName"
+                        @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                            <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                        </button>
+                        @{
+                            string wishlistBtnClass = Model.IsInUserWishlist ? "active-wishlist" : "";
+                            string heartIcnClass = Model.IsInUserWishlist ? "fas" : "far";
+                        }
+                        <button id="addToWishlistDetails" @* Đổi ID nếu cần style riêng, hoặc chỉ dùng class *@
+                                class="btn btn-outline-danger btn-lg ms-2 btn-wishlist @wishlistBtnClass"
+                                data-product-id="@Model.ProductID"
+                                data-product-name="@Model.ProductName"
+                                data-ajax-url="@Url.Action("ToggleWishlist", "Wishlist")"
+                                data-login-url="@Url.Action("Login", "Account")"
+                                data-is-wishlisted="@Model.IsInUserWishlist.ToString().ToLower()">
+                            <i class="@heartIcnClass fa-heart"></i>
+                            <span>@(Model.IsInUserWishlist ? "Xóa khỏi Yêu thích" : "Thêm vào Yêu thích")</span>
+                        </button>
+                    </div>
+
+                    <div class="share-buttons mt-4">
+                        <p class="mb-2">Chia sẻ sản phẩm:</p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary share-button" data-platform="facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info share-button" data-platform="twitter">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger share-button" data-platform="pinterest">
+                                <i class="fab fa-pinterest-p"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary share-button" data-platform="email">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Tabs -->
+    <div class="product-tabs mt-5">
+        <div class="d-flex border-bottom">
+            <div class="product-tab-link active" data-tab="features">Tính năng</div>
+            <div class="product-tab-link" data-tab="specifications">Thông số kỹ thuật</div>
+            <div class="product-tab-link" data-tab="reviews">Đánh giá</div>
+        </div>
+
+        <div id="features" class="product-tab-content active">
+            <ul class="list-group list-group-flush">
+                @foreach (var feature in Model.Features)
+                {
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i> @feature
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div id="specifications" class="product-tab-content">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <tbody>
+                        @foreach (var spec in Model.Specifications)
+                        {
+                            <tr>
+                                <th width="30%">@spec.Key</th>
+                                <td>@spec.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="reviews" class="product-tab-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Đánh giá từ khách hàng</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                    <i class="fas fa-star me-1"></i> Viết đánh giá
+                </button>
+            </div>
+
+            <div id="reviewsContainer">
+                @if (Model.Reviews != null && Model.Reviews.Any())
+                {
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="rating-display me-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="@(i <= Model.AverageRating ? "fas" : "far") fa-star"></i>
+                                }
+                            </div>
+                            <span class="fw-bold">@Model.AverageRating.ToString("0.0")</span>
+                            <span class="text-muted ms-2">(@Model.Reviews.Count đánh giá)</span>
+                        </div>
+                    </div>
+
+                    <div class="review-list">
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating-display me-2">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="@(i <= review.Rating ? "fas" : "far") fa-star"></i>
+                                                }
+                                            </div>
+                                            <span class="fw-bold">@review.UserName</span>
+                                        </div>
+                                        <small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                    <p class="mb-0">@review.Comment</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (ViewBag.RelatedProducts != null && ViewBag.RelatedProducts.Count > 0)
+    {
+        <div class="related-products mt-5">
+            <div class="section-title">
+                <h2>Sản phẩm liên quan</h2>
+            </div>
+            <div class="row">
+                @foreach (var relatedProduct in ViewBag.RelatedProducts)
+                {
+                    <div class="col-md-3 col-sm-6 mb-4" data-aos="fade-up">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <a href="@Url.Action("Details", "Product", new { id = relatedProduct.ProductID })">
+                                    <img src="/Images/@relatedProduct.MainImagePath" alt="@relatedProduct.ProductName" class="img-fluid">
+                                </a>
+                            </div>
+                            <div class="product-info">
+                                <h5 class="product-title">
+                                    <a href="@Url.Action("Details", "Product", new { id = relatedProduct.ProductID })">@relatedProduct.ProductName</a>
+                                </h5>
+                                <div class="product-price">
+                                    <span class="current-price">@relatedProduct.Price.ToString("N0") VNĐ</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-product-id="@relatedProduct.ProductID">
+                                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Viết đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm" action="@Url.Action("AddReview", "Product")" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="productId" name="productId" value="@Model.ProductID">
+
+                    <div class="mb-3">
+                        <label class="form-label">Đánh giá</label>
+                        <div class="rating-stars mb-2">
+                            <i class="far fa-star" data-rating="1"></i>
+                            <i class="far fa-star" data-rating="2"></i>
+                            <i class="far fa-star" data-rating="3"></i>
+                            <i class="far fa-star" data-rating="4"></i>
+                            <i class="far fa-star" data-rating="5"></i>
+                        </div>
+                        <div class="rating-inputs">
+                            <input type="radio" name="rating" id="rating-1" value="1" class="rating-input d-none">
+                            <input type="radio" name="rating" id="rating-2" value="2" class="rating-input d-none">
+                            <input type="radio" name="rating" id="rating-3" value="3" class="rating-input d-none">
+                            <input type="radio" name="rating" id="rating-4" value="4" class="rating-input d-none">
+                            <input type="radio" name="rating" id="rating-5" value="5" class="rating-input d-none">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Nhận xét của bạn</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn với sản phẩm này"></textarea>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize variables
+            var price = parseFloat($('#productPrice').data('price'));
+            var discountedPrice = $('#productPrice').data('discounted-price');
+            var currentPrice = discountedPrice ? parseFloat(discountedPrice) : price;
+            var quantity = parseInt($('#quantity').val());
+
+            // Update total price
+            function updateTotalPrice() {
+                var total = currentPrice * quantity;
+                $('#totalPrice').text(total.toLocaleString('vi-VN') + ' VNĐ');
+            }
+
+            // Initialize total price
+            updateTotalPrice();
+
+            // Quantity buttons
+            $('#decreaseQuantity').click(function() {
+                if (quantity > 1) {
+                    quantity--;
+                    $('#quantity').val(quantity);
+                    updateTotalPrice();
+                }
+            });
+
+            $('#increaseQuantity').click(function() {
+                var maxStock = parseInt('@Model.StockQuantity');
+                if (quantity < maxStock) {
+                    quantity++;
+                    $('#quantity').val(quantity);
+                    updateTotalPrice();
+                }
+            });
+
+            $('#quantity').change(function() {
+                var newQuantity = parseInt($(this).val());
+                var maxStock = parseInt('@Model.StockQuantity');
+
+                if (newQuantity < 1) {
+                    newQuantity = 1;
+                    $(this).val(1);
+                } else if (newQuantity > maxStock) {
+                    newQuantity = maxStock;
+                    $(this).val(maxStock);
+                }
+
+                quantity = newQuantity;
+                updateTotalPrice();
+            });
+
+            // Product tabs
+            $('.product-tab-link').click(function() {
+                $('.product-tab-link').removeClass('active');
+                $(this).addClass('active');
+
+                var tabId = $(this).data('tab');
+                $('.product-tab-content').removeClass('active');
+                $('#' + tabId).addClass('active');
+            });
+
+            // Rating stars
+            $('.rating-stars i').hover(
+                function() {
+                    var rating = $(this).data('rating');
+                    for (var i = 1; i <= 5; i++) {
+                        if (i <= rating) {
+                            $('.rating-stars i[data-rating="' + i + '"]').removeClass('far').addClass('fas');
+                        } else {
+                            $('.rating-stars i[data-rating="' + i + '"]').removeClass('fas').addClass('far');
+                        }
+                    }
+                },
+                function() {
+                    var selectedRating = $('input[name="rating"]:checked').val();
+                    if (selectedRating) {
+                        for (var i = 1; i <= 5; i++) {
+                            if (i <= selectedRating) {
+                                $('.rating-stars i[data-rating="' + i + '"]').removeClass('far').addClass('fas');
+                            } else {
+                                $('.rating-stars i[data-rating="' + i + '"]').removeClass('fas').addClass('far');
+                            }
+                        }
+                    } else {
+                        $('.rating-stars i').removeClass('fas').addClass('far');
+                    }
+                }
+            );
+
+            $('.rating-stars i').click(function() {
+                var rating = $(this).data('rating');
+                $('#rating-' + rating).prop('checked', true);
+
+                for (var i = 1; i <= 5; i++) {
+                    if (i <= rating) {
+                        $('.rating-stars i[data-rating="' + i + '"]').removeClass('far').addClass('fas');
+                    } else {
+                        $('.rating-stars i[data-rating="' + i + '"]').removeClass('fas').addClass('far');
+                    }
+                }
+            });
+
+            // Add to cart
+            $('#addToCartBtn').click(function() {
+                var productId = $(this).data('product-id');
+                var quantity = $('#quantity').val();
+
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Cart")',
+                    type: 'POST',
+                    data: { productId: productId, quantity: quantity },
+                    success: function(data) {
+                        if (data.success) {
+                            $('.cart-count').text(data.cartCount);
+                        } else {
+                            window.showNotification(data.message, 'danger');
+                        }
+                    },
+                    error: function() {
+                        window.showNotification('Lỗi khi thêm sản phẩm vào giỏ hàng.', 'danger');
+                    }
+                });
+            });
+
+            // Add to wishlist
+            $('#addToWishlist').click(function() {
+                var button = $(this);
+                var productId = button.data('product-id');
+                var returnUrl = encodeURIComponent(window.location.href);
+
+                $.ajax({
+                    url: '@Url.Action("AddToWishlist", "Wishlist")',
+                    type: 'POST',
+                    data: { productId: productId },
+                    success: function(data) {
+                        if (data.success) {
+                            if (data.added) {
+                                button.addClass('active');
+                                button.find('i').removeClass('far').addClass('fas');
+
+                                if (data.alreadyExists) {
+                                    window.showNotification(data.message, 'info', 'Danh sách yêu thích');
+                                } else {
+                                    window.showNotification(data.message, 'success', 'Danh sách yêu thích');
+                                }
+                            } else {
+                                button.removeClass('active');
+                                button.find('i').removeClass('fas').addClass('far');
+                                window.showNotification(data.message, 'success', 'Danh sách yêu thích');
+                            }
+                        } else {
+                            if (data.redirectToLogin) {
+                                if (confirm(data.message || 'Bạn cần đăng nhập để thêm sản phẩm vào danh sách yêu thích. Đăng nhập ngay?')) {
+                                    window.location.href = '@Url.Action("Login", "Account")' + '?returnUrl=' + returnUrl;
+                                }
+                            } else {
+                                window.showNotification(data.message || 'Không thể thêm vào danh sách yêu thích.', 'danger');
+                            }
+                        }
+                    },
+                    error: function() {
+                        window.showNotification('Lỗi khi thêm sản phẩm vào danh sách yêu thích.', 'danger');
+                    }
+                });
+            });
+
+            // Check if product is in wishlist
+            function checkWishlistStatus() {
+                if (!@User.Identity.IsAuthenticated.ToString().ToLower()) {
+                    return; // Skip if user is not authenticated
+                }
+
+                var productId = @Model.ProductID;
+
+                $.ajax({
+                    url: '@Url.Action("IsInWishlist", "Wishlist")',
+                    type: 'GET',
+                    data: { productId: productId },
+                    success: function(data) {
+                        if (data.inWishlist) {
+                            $('#addToWishlist').addClass('active');
+                            $('#addToWishlist').find('i').removeClass('far').addClass('fas');
+                        }
+                    }
+                });
+            }
+
+            // Initialize wishlist status
+            checkWishlistStatus();
+
+            // Share buttons
+            $('.share-button').click(function() {
+                var platform = $(this).data('platform');
+                var url = encodeURIComponent(window.location.href);
+                var title = encodeURIComponent('@Model.ProductName');
+
+                switch(platform) {
+                    case 'facebook':
+                        window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+                        break;
+                    case 'twitter':
+                        window.open('https://twitter.com/intent/tweet?url=' + url + '&text=' + title, '_blank');
+                        break;
+                    case 'pinterest':
+                        var image = encodeURIComponent('/Images/@Model.MainImagePath');
+                        window.open('https://pinterest.com/pin/create/button/?url=' + url + '&media=' + image + '&description=' + title, '_blank');
+                        break;
+                    case 'email':
+                        window.location.href = 'mailto:?subject=' + title + '&body=Xem sản phẩm này: ' + url;
+                        break;
+                }
+            });
+
+            // Review form submission
+            $('#reviewForm').submit(function(e) {
+                e.preventDefault();
+
+                var rating = $('input[name="rating"]:checked').val();
+                var comment = $('#comment').val();
+                var productId = $('#productId').val();
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                if (!rating) {
+                    window.showNotification('Vui lòng chọn đánh giá sao.', 'warning');
+                    return;
+                }
+
+                if (!comment) {
+                    window.showNotification('Vui lòng nhập nhận xét của bạn.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddReview", "Product")',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        rating: rating,
+                        comment: comment,
+                        __RequestVerificationToken: token
+                    },
+                    success: function(data) {
+                        if (data.success) {
+                            $('#reviewModal').modal('hide');
+                            window.showNotification(data.message, 'success');
+
+                            // Cập nhật danh sách đánh giá
+                            updateReviewsDisplay(data.reviews, data.averageRating);
+
+                            // Reset form
+                            $('#comment').val('');
+                            $('input[name="rating"]').prop('checked', false);
+                            $('.rating-stars i').removeClass('fas').addClass('far');
+                        } else {
+                            window.showNotification(data.message, 'danger');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error details:", xhr.responseText);
+                        window.showNotification('Lỗi khi gửi đánh giá.', 'danger');
+                    }
+                });
+            });
+
+            // Hàm cập nhật hiển thị đánh giá
+            function updateReviewsDisplay(reviews, averageRating) {
+                if (!reviews || reviews.length === 0) {
+                    $('#reviewsContainer').html(
+                        '<div class="alert alert-info">' +
+                        '<i class="fas fa-info-circle me-2"></i> Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!' +
+                        '</div>'
+                    );
+                    return;
+                }
+
+                var html = '<div class="mb-4">' +
+                    '<div class="d-flex align-items-center mb-2">' +
+                    '<div class="rating-display me-2">';
+
+                for (var i = 1; i <= 5; i++) {
+                    html += '<i class="' + (i <= averageRating ? 'fas' : 'far') + ' fa-star"></i>';
+                }
+
+                html += '</div>' +
+                    '<span class="fw-bold">' + averageRating.toFixed(1) + '</span>' +
+                    '<span class="text-muted ms-2">(' + reviews.length + ' đánh giá)</span>' +
+                    '</div></div>' +
+                    '<div class="review-list">';
+
+                reviews.forEach(function(review) {
+                    html += '<div class="card mb-3">' +
+                        '<div class="card-body">' +
+                        '<div class="d-flex justify-content-between mb-2">' +
+                        '<div class="d-flex align-items-center">' +
+                        '<div class="rating-display me-2">';
+
+                    for (var i = 1; i <= 5; i++) {
+                        html += '<i class="' + (i <= review.rating ? 'fas' : 'far') + ' fa-star"></i>';
+                    }
+
+                    html += '</div>' +
+                        '<span class="fw-bold">' + review.userName + '</span>' +
+                        '</div>' +
+                        '<small class="text-muted">' + formatDate(new Date(review.createdAt)) + '</small>' +
+                        '</div>' +
+                        '<p class="mb-0">' + review.comment + '</p>' +
+                        '</div></div>';
+                });
+
+                html += '</div>';
+
+                $('#reviewsContainer').html(html);
+            }
+
+            // Hàm định dạng ngày tháng
+            function formatDate(date) {
+                var day = date.getDate().toString().padStart(2, '0');
+                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                var year = date.getFullYear();
+                return day + '/' + month + '/' + year;
+            }
+        });
+
+        // Change main image
+        function changeMainImage(src) {
+            $('#mainImage').attr('src', src);
+            $('#mainImage').attr('data-zoom-image', src);
+            $('.thumbnail').removeClass('active');
+            $('.thumbnail[src="' + src + '"]').addClass('active');
+        }
+    </script>
+}

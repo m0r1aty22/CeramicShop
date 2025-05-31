@@ -1,0 +1,38 @@
+﻿@model int
+
+<form id="cancelOrderForm" action="@Url.Action("CancelOrder", "Order")" method="post">
+    <input type="hidden" name="orderId" value="@Model" />
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">
+        <i class="fas fa-times"></i> Xác nhận hủy đơn hàng
+    </button>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $("#cancelOrderForm").on("submit", function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: $(this).attr("action"),
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(data) {
+                    if (data.success) {
+                        window.showNotification(data.message, "success", "Đơn hàng");
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        window.showNotification(data.message, "danger", "Lỗi");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    console.error("Response:", xhr.responseText);
+                    window.showNotification("Lỗi khi hủy đơn hàng: " + error, "danger", "Lỗi");
+                }
+            });
+        });
+    });
+</script>

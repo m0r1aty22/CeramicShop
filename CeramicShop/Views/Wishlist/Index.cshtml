@@ -1,0 +1,248 @@
+﻿@model IEnumerable<CeramicShop.Models.ViewModels.ProductViewModel>
+@{
+    ViewBag.Title = "Danh sách yêu thích";
+}
+
+<div class="wishlist-container">
+    <div class="section-title">
+        <h2>Danh sách yêu thích</h2>
+    </div>
+
+    <div id="wishlist-items-container">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover wishlist-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Tình trạng</th>
+                            <th>Thêm vào</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr id="wishlist-item-@item.ProductID" class="wishlist-item" data-product-id="@item.ProductID">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wishlist-item-image me-3">
+                                            <a href="@Url.Action("Details", "Product", new { id = item.ProductID })">
+                                                <img src="/Images/@item.MainImagePath" alt="@item.ProductName" class="img-fluid" style="max-width: 80px;">
+                                            </a>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">
+                                                <a href="@Url.Action("Details", "Product", new { id = item.ProductID })" class="text-decoration-none">
+                                                    @item.ProductName
+                                                </a>
+                                            </h5>
+                                            <div class="small text-muted">
+                                                <span>Danh mục: </span>
+                                                <a href="@Url.Action("Index", "Product", new { categoryName = item.CategoryName })" class="text-decoration-none">@item.CategoryName</a> /
+                                                <a href="@Url.Action("Index", "Product", new { subCategoryName = item.SubCategoryName })" class="text-decoration-none">@item.SubCategoryName</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.HasSpecificPromotion && item.DiscountPercentage.HasValue)
+                                    {
+                                        <div class="discount-badge">-@item.DiscountPercentage%</div>
+                                        <div>
+                                            <span class="original-price">@item.Price.ToString("N0") VNĐ</span>
+                                            <span class="current-price">@item.DiscountedPrice.Value.ToString("N0") VNĐ</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="current-price">@item.Price.ToString("N0") VNĐ</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.StockQuantity > 0)
+                                    {
+                                        <span class="badge bg-success">Còn hàng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Hết hàng</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">@item.AddedToWishlistAt?.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-primary btn-sm move-to-cart" data-product-id="@item.ProductID" @(item.StockQuantity <= 0 ? "disabled" : "")>
+                                            <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm remove-from-wishlist" data-product-id="@item.ProductID" data-product-name="@item.ProductName">
+                                            <i class="fas fa-trash-alt"></i> Xóa
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-wishlist text-center py-5">
+                <i class="fas fa-heart fa-5x mb-3 text-muted"></i>
+                <h3>Danh sách yêu thích trống</h3>
+                <p class="text-muted">Danh sách yêu thích của bạn hiện đang trống.</p>
+                <a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">
+                    <i class="fas fa-shopping-cart me-2"></i> Tiếp tục mua sắm
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Xác nhận xóa Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa <span id="deleteProductName" class="fw-bold"></span> khỏi danh sách yêu thích?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý sự kiện khi click vào nút xóa
+            $('.remove-from-wishlist').click(function() {
+                var productId = $(this).data('product-id');
+                var productName = $(this).data('product-name');
+
+                // Hiển thị modal xác nhận
+                $('#deleteProductName').text(productName);
+                var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+
+                // Lưu productId vào nút xác nhận
+                $('#confirmDelete').data('product-id', productId);
+
+                modal.show();
+            });
+
+            // Xử lý sự kiện khi xác nhận xóa
+            $('#confirmDelete').click(function() {
+                var productId = $(this).data('product-id');
+
+                // Gửi AJAX request để xóa sản phẩm
+                $.ajax({
+                    url: '@Url.Action("RemoveFromWishlist", "Wishlist")',
+                    type: 'POST',
+                    data: { productId: productId },
+                    success: function(data) {
+                        if (data.success) {
+                            // Ẩn modal
+                            $('#confirmDeleteModal').modal('hide');
+
+                            // Hiệu ứng fade out và xóa phần tử
+                            $('#wishlist-item-' + productId).fadeOut(300, function() {
+                                $(this).remove();
+
+                                // Kiểm tra nếu không còn sản phẩm nào
+                                if ($('.wishlist-item').length === 0) {
+                                    $('#wishlist-items-container').html(
+                                        '<div class="empty-wishlist text-center py-5">' +
+                                        '<i class="fas fa-heart fa-5x mb-3 text-muted"></i>' +
+                                        '<h3>Danh sách yêu thích trống</h3>' +
+                                        '<p class="text-muted">Danh sách yêu thích của bạn hiện đang trống.</p>' +
+                                        '<a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">' +
+                                        '<i class="fas fa-shopping-cart me-2"></i> Tiếp tục mua sắm' +
+                                        '</a>' +
+                                        '</div>'
+                                    );
+                                }
+                            });
+
+                            // Hiển thị thông báo thành công
+                            window.showNotification(data.message, 'success', 'Danh sách yêu thích');
+                        } else {
+                            // Hiển thị thông báo lỗi
+                            window.showNotification(data.message, 'danger', 'Lỗi');
+                        }
+                    },
+                    error: function() {
+                        window.showNotification('Lỗi khi xóa sản phẩm khỏi danh sách yêu thích.', 'danger', 'Lỗi');
+                    }
+                });
+            });
+
+            // Xử lý sự kiện khi click vào nút thêm vào giỏ
+            $('.move-to-cart').click(function() {
+                var button = $(this);
+                var productId = button.data('product-id');
+
+                // Hiển thị trạng thái đang xử lý
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...');
+
+                // Gửi AJAX request để chuyển sản phẩm vào giỏ hàng
+                $.ajax({
+                    url: '@Url.Action("MoveToCart", "Wishlist")',
+                    type: 'POST',
+                    data: { productId: productId },
+                    success: function(data) {
+                        if (data.success) {
+                            // Cập nhật số lượng giỏ hàng
+                            $('.cart-count').text(data.cartCount);
+
+                            // Xóa sản phẩm khỏi danh sách yêu thích
+                            $('#wishlist-item-' + productId).fadeOut(300, function() {
+                                $(this).remove();
+
+                                // Kiểm tra nếu không còn sản phẩm nào
+                                if ($('.wishlist-item').length === 0) {
+                                    $('#wishlist-items-container').html(
+                                        '<div class="empty-wishlist text-center py-5">' +
+                                        '<i class="fas fa-heart fa-5x mb-3 text-muted"></i>' +
+                                        '<h3>Danh sách yêu thích trống</h3>' +
+                                        '<p class="text-muted">Danh sách yêu thích của bạn hiện đang trống.</p>' +
+                                        '<a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">' +
+                                        '<i class="fas fa-shopping-cart me-2"></i> Tiếp tục mua sắm' +
+                                        '</a>' +
+                                        '</div>'
+                                    );
+                                }
+                            });
+
+                            // Hiển thị thông báo thành công
+                            window.showNotification(data.message, 'success', 'Giỏ hàng');
+                        } else {
+                            // Khôi phục nút
+                            button.prop('disabled', false).html('<i class="fas fa-shopping-cart"></i> Thêm vào giỏ');
+
+                            // Hiển thị thông báo lỗi
+                            window.showNotification(data.message, 'danger', 'Lỗi');
+                        }
+                    },
+                    error: function() {
+                        // Khôi phục nút
+                        button.prop('disabled', false).html('<i class="fas fa-shopping-cart"></i> Thêm vào giỏ');
+
+                        // Hiển thị thông báo lỗi
+                        window.showNotification('Lỗi khi chuyển sản phẩm vào giỏ hàng.', 'danger', 'Lỗi');
+                    }
+                });
+            });
+        });
+    </script>
+}

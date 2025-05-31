@@ -1,0 +1,100 @@
+﻿@model CeramicShop.Models.ViewModels.PromotionCreateViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa khuyến mãi";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chỉnh sửa khuyến mãi</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Khuyến mãi</a></li>
+        <li class="breadcrumb-item active">Chỉnh sửa</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit mr-1"></i>
+            Thông tin khuyến mãi
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="PromotionID" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PromotionName" class="control-label">Tên khuyến mãi</label>
+                            <input asp-for="PromotionName" class="form-control" />
+                            <span asp-validation-for="PromotionName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="ProductID" class="control-label">Sản phẩm</label>
+                            <select asp-for="ProductID" class="form-control" asp-items="ViewBag.Products">
+                                <option value="">-- Toàn hệ thống --</option>
+                            </select>
+                            <small class="form-text text-muted">Để trống nếu muốn áp dụng cho toàn bộ sản phẩm.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="DiscountPercentage" class="control-label">Phần trăm giảm giá (%)</label>
+                            <input asp-for="DiscountPercentage" class="form-control" type="number" min="0" max="100" step="0.01" />
+                            <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PromoCode" class="control-label">Mã khuyến mãi</label>
+                            <input asp-for="PromoCode" class="form-control" />
+                            <span asp-validation-for="PromoCode" class="text-danger"></span>
+                            <small class="form-text text-muted">Mã khuyến mãi dùng để nhập khi thanh toán.</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="StartDate" class="control-label">Ngày bắt đầu</label>
+                            <input asp-for="StartDate" class="form-control" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="EndDate" class="control-label">Ngày kết thúc</label>
+                            <input asp-for="EndDate" class="form-control" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" asp-for="IsActive" /> Kích hoạt
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Lưu
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

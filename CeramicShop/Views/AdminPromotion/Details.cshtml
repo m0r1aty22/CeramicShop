@@ -1,0 +1,103 @@
+﻿@model CeramicShop.Models.Promotion
+@{
+    ViewData["Title"] = "Chi tiết khuyến mãi";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết khuyến mãi</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Khuyến mãi</a></li>
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle mr-1"></i>
+            Thông tin khuyến mãi
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên khuyến mãi</dt>
+                        <dd class="col-sm-8">@Model.PromotionName</dd>
+
+                        <dt class="col-sm-4">Mã khuyến mãi</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.PromoCode))
+                            {
+                                <span class="badge badge-info">@Model.PromoCode</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không có</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Sản phẩm</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Product != null)
+                            {
+                                <a href="@Url.Action("Details", "AdminProduct", new { id = Model.ProductID })">@Model.Product.ProductName</a>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">Toàn hệ thống</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Phần trăm giảm giá</dt>
+                        <dd class="col-sm-8">@Model.DiscountPercentage%</dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Ngày bắt đầu</dt>
+                        <dd class="col-sm-8">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Ngày kết thúc</dt>
+                        <dd class="col-sm-8">@Model.EndDate.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                if (DateTime.Now < Model.StartDate)
+                                {
+                                    <span class="badge badge-info">Sắp diễn ra</span>
+                                }
+                                else if (DateTime.Now > Model.EndDate)
+                                {
+                                    <span class="badge badge-secondary">Đã kết thúc</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success">Đang diễn ra</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không kích hoạt</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Mô tả</dt>
+                        <dd class="col-sm-8">@Model.Description</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.PromotionID" class="btn btn-primary">
+                    <i class="fas fa-edit mr-1"></i> Chỉnh sửa
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

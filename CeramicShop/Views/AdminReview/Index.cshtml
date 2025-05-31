@@ -1,0 +1,147 @@
+﻿@model IEnumerable<CeramicShop.Models.Review>
+@{
+    ViewData["Title"] = "Quản lý đánh giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý đánh giá</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Bảng điều khiển</a></li>
+        <li class="breadcrumb-item active">Đánh giá</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-star mr-1"></i>
+            Danh sách đánh giá
+        </div>
+        <div class="card-body">
+            <div class="filter-section mb-4">
+                <form method="get" action="@Url.Action("Index")">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tìm kiếm</label>
+                                <input type="text" class="form-control" name="searchString" value="@ViewBag.SearchString" placeholder="Nội dung, sản phẩm, người dùng...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Sản phẩm</label>
+                                <select class="form-control" name="productId">
+                                    <option value="">Tất cả</option>
+                                    @foreach (var product in ViewBag.Products)
+                                    {
+                                        <option value="@product.ProductID" selected=@(ViewBag.ProductId == product.ProductID ? "selected" : "")>@product.ProductName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Đánh giá</label>
+                                <select class="form-control" name="rating">
+                                    <option value="">Tất cả</option>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <option value="@i" selected=@(ViewBag.Rating == i ? "selected" : "")>@i sao</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search mr-1"></i> Tìm kiếm
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt mr-1"></i> Làm mới
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="reviewsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Người dùng</th>
+                            <th>Đánh giá</th>
+                            <th>Nội dung</th>
+                            <th>Ngày đánh giá</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (item.Product != null)
+                                    {
+                                        <a href="@Url.Action("Details", "AdminProduct", new { id = item.ProductID })">@item.Product.ProductName</a>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.User != null)
+                                    {
+                                        <div>@item.User.FullName</div>
+                                        <small class="text-muted">@item.User.Email</small>
+                                    }
+                                </td>
+                                <td>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= item.Rating)
+                                        {
+                                            <i class="fas fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-warning"></i>
+                                        }
+                                    }
+                                </td>
+                                <td>@(item.Comment?.Length > 50 ? item.Comment.Substring(0, 50) + "..." : item.Comment)</td>
+                                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Details", new { id = item.ReviewID })" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Chi tiết">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        @* <a href="@Url.Action("Delete", new { id = item.ReviewID })" class="btn btn-sm btn-danger btn-delete" data-toggle="tooltip" title="Xóa"> *@
+                                        @*     <i class="fas fa-trash"></i> *@
+                                        @* </a> *@
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#reviewsTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+                }
+            });
+        });
+    </script>
+}

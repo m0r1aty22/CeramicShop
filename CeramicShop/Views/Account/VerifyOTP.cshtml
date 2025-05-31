@@ -1,0 +1,59 @@
+﻿@model CeramicShop.Models.ViewModels.VerifyOTPViewModel
+
+@{
+    ViewBag.Title = "Xác minh OTP";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card login-card animate__animated animate__fadeIn">
+            <div class="card-header text-center">
+                <h4 class="mb-0">Xác minh mã OTP</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-center mb-4">Vui lòng nhập mã OTP đã được gửi đến email của bạn</p>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <form asp-action="VerifyOTP" asp-controller="Account" method="post">
+                    <input type="hidden" asp-for="Email" value="@Model.Email" />
+
+                    <div class="mb-3">
+                        <label asp-for="OTP" class="form-label">Mã OTP</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input asp-for="OTP" class="form-control" placeholder="Nhập mã OTP 6 số" required maxlength="6">
+                        </div>
+                        <span asp-validation-for="OTP" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check-circle me-2"></i> Xác minh
+                        </button>
+                        <a href="@Url.Action("ForgotPassword", "Account")" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Không nhận được mã? <a href="@Url.Action("ForgotPassword", "Account")">Gửi lại</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Tự động focus vào ô nhập OTP
+        $(document).ready(function() {
+            $('#OTP').focus();
+        });
+    </script>
+}

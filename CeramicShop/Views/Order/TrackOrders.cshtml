@@ -1,0 +1,119 @@
+﻿@model List<CeramicShop.Models.ViewModels.OrderViewModel>
+
+@{
+    ViewBag.Title = "Đơn hàng của tôi";
+}
+
+<div class="orders-container">
+    <h1 class="mb-4">Đơn hàng của tôi</h1>
+
+    @if (Model.Count == 0)
+    {
+        <div class="empty-orders text-center py-5">
+            <i class="fas fa-shopping-bag fa-5x mb-3 text-muted"></i>
+            <h3>Chưa có đơn hàng nào</h3>
+            <p class="text-muted">Bạn chưa đặt đơn hàng nào.</p>
+            <a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">
+                <i class="fas fa-shopping-cart me-2"></i> Bắt đầu mua sắm
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Phương thức thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>#@order.OrderID</td>
+                                    <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@order.TotalAmount.ToString("N0") VNĐ</td>
+                                    <td>@order.PaymentMethod</td>
+                                    <td>
+                                        @switch (order.OrderStatus)
+                                        {
+                                            case "Pending":
+                                                <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                                break;
+                                            case "Confirmed":
+                                                <span class="badge bg-info">Đã xác nhận</span>
+                                                break;
+                                            case "Shipped":
+                                                <span class="badge bg-primary">Đang giao hàng</span>
+                                                break;
+                                            case "Delivered":
+                                                <span class="badge bg-success">Đã giao hàng</span>
+                                                break;
+                                            case "Cancelled":
+                                                <span class="badge bg-danger">Đã hủy</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">@order.OrderStatus</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("OrderDetails", "Order", new { id = order.OrderID })" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i> Xem
+                                        </a>
+                                        @if (order.OrderStatus == "Pending" || order.OrderStatus == "Confirmed")
+                                        {
+                                            <button class="btn btn-sm btn-outline-danger ms-1 cancel-order-btn" data-order-id="@order.OrderID">
+                                                <i class="fas fa-times me-1"></i> Hủy
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="@Url.Action("Index", "Product")" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+            </a>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Log order IDs for debugging
+        @foreach (var order in Model)
+        {
+            if (order.OrderStatus == "Pending" || order.OrderStatus == "Confirmed")
+            {
+                <text>console.log("Order ID in list: @order.OrderID");</text>
+            }
+        }
+
+            // Check if cancel buttons exist
+            var cancelButtons = $(".cancel-order-btn");
+            if (cancelButtons.length) {
+                console.log("Found " + cancelButtons.length + " cancel buttons");
+                cancelButtons.each(function() {
+                    console.log("Cancel button with order ID: " + $(this).data("order-id"));
+                });
+            } else {
+                console.log("No cancel buttons found on page");
+            }
+        });
+    </script>
+}

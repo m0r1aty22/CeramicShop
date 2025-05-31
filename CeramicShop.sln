@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CeramicShop", "CeramicShop\CeramicShop.csproj", "{88AADA88-33DE-44B6-9571-7EA3F2AA4DFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88AADA88-33DE-44B6-9571-7EA3F2AA4DFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88AADA88-33DE-44B6-9571-7EA3F2AA4DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88AADA88-33DE-44B6-9571-7EA3F2AA4DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88AADA88-33DE-44B6-9571-7EA3F2AA4DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2AF0E79F-6B71-4802-8F3B-BE14970228EC}
+	EndGlobalSection
+EndGlobal
