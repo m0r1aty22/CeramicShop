@@ -1,12 +1,13 @@
 ﻿using CeramicShop.Data;
+using CeramicShop.Models;
+using CeramicShop.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDistributedMemoryCache(); // ✅ cấu hình session
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -14,12 +15,21 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -31,8 +41,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession(); // ✅ đặt trước Authorization
-
+app.UseSession();
+app.UseAuthentication(); // ✅ Phải có dòng này
 app.UseAuthorization();
 
 app.MapControllerRoute(
