@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - CeramicShop</title>
-    <link rel="icon" href="~/Images/MKD.png" type="image/png" />
+    <link rel="icon" href="~/Images/CeramicShopLogo.png" type="image/png" />
     <!-- Giả sử Bootstrap CSS nằm trong wwwroot/lib/bootstrap/dist/css/ -->
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" asp-append-version="true" />
     <!-- Chỉ sử dụng một file CSS duy nhất -->
@@ -140,11 +140,11 @@
                 <div class="col-md-3 mb-4 mb-md-0">
                     <h5>Dịch vụ khách hàng</h5>
                     <ul class="footer-links">
-                        <li><a href="#">Chính sách vận chuyển</a></li>
-                        <li><a href="#">Chính sách đổi trả</a></li>
-                        <li><a href="#">Điều khoản & Điều kiện</a></li>
-                        <li><a href="#">Chính sách bảo mật</a></li>
-                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="@Url.Action("ShippingPolicy", "Home")">Chính sách vận chuyển</a></li>
+                        <li><a href="@Url.Action("ReturnPolicy", "Home")">Chính sách đổi trả</a></li>
+                        <li><a href="@Url.Action("Terms", "Home")">Điều khoản & Điều kiện</a></li>
+                        <li><a href="@Url.Action("PrivacyPolicy", "Home")">Chính sách bảo mật</a></li>
+                        <li><a href="@Url.Action("FAQ", "Home")">Câu hỏi thường gặp</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
