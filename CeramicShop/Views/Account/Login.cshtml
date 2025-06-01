@@ -2,6 +2,11 @@
     ViewBag.Title = "Đăng nhập";
 }
 
+@section styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+}
+
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
         <div class="card login-card animate__animated animate__fadeIn">
@@ -16,11 +21,9 @@
                     @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
                     {
                         <div id="loginErrorSummary" class="alert alert-danger login-error-summary mb-3" role="alert">
-                            @* Hoặc nếu bạn muốn hiển thị lỗi cụ thể được thêm bằng ModelState.AddModelError(string.Empty, ...)*@
                             @if (ViewData.ModelState.ContainsKey(string.Empty) && ViewData.ModelState[string.Empty].Errors.Any())
                             {
                                 <ul class="mb-0 ps-3">
-                                    @* ps-3 để thêm padding start cho list *@
                                     @foreach (var error in ViewData.ModelState[string.Empty].Errors)
                                     {
                                         <li>@error.ErrorMessage</li>
@@ -28,15 +31,6 @@
                                 </ul>
                             }
                         </div>
-                    }
-                    else
-                    {
-                        @* Render một div trống và ẩn nếu bạn MUỐN dùng JS để hiện nó sau,
-                           NHƯNG cách này không được khuyến khích bằng việc không render gì cả.
-                           Nếu bạn muốn JS kiểm soát hoàn toàn, server không nên render khối alert nào cả
-                           và JS sẽ tự tạo và chèn nó khi có lỗi.
-                        *@
-                        // <div id="loginErrorSummary" class="alert alert-danger login-error-summary mb-3 d-none" role="alert"></div>
                     }
 
                     <div class="mb-3">
@@ -52,7 +46,7 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             <input type="password" class="form-control" id="password" name="password" required>
-                            <button class="btn btn-outline-secondary password-toggle" type="button" data-target="#password">
+                            <button class="btn btn-outline-secondary password-toggle" type="button">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -73,18 +67,6 @@
                 <div class="text-center mt-3">
                     <a href="@Url.Action("ForgotPassword", "Account")">Quên mật khẩu?</a>
                 </div>
-
-                <div class="social-login mt-4">
-                    <p class="text-center mb-3">Hoặc đăng nhập với</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary">
-                            <i class="fab fa-facebook-f me-2"></i> Facebook
-                        </button>
-                        <button class="btn btn-outline-danger">
-                            <i class="fab fa-google me-2"></i> Google
-                        </button>
-                    </div>
-                </div>
             </div>
             <div class="card-footer text-center">
                 <p class="mb-0">Chưa có tài khoản? <a href="@Url.Action("Register", "Account")">Đăng ký</a></p>
@@ -94,31 +76,41 @@
 </div>
 
 @section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script>
-        $(document).ready(function() {
-            // Toggle password visibility
-            $('.password-toggle').click(function() {
-                var target = $(this).data('target');
-                var input = $(target);
+        $(document).ready(function () {
+            console.log("jQuery loaded:", typeof $ !== "undefined"); // Kiểm tra jQuery
 
-                if (input.attr('type') === 'password') {
-                    input.attr('type', 'text');
-                    $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+            // Toggle password visibility
+            $('.password-toggle').click(function () {
+                console.log("Password toggle clicked"); // Debug
+
+                var $inputGroup = $(this).closest('.input-group');
+                var $input = $inputGroup.find('input');
+                var $icon = $(this).find('i');
+
+                if ($input.length) {
+                    console.log("Input found, current type:", $input.attr('type')); // Debug
+                    if ($input.attr('type') === 'password') {
+                        $input.attr('type', 'text');
+                        $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                        console.log("Switched to text"); // Debug
+                    } else {
+                        $input.attr('type', 'password');
+                        $icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                        console.log("Switched to password"); // Debug
+                    }
                 } else {
-                    input.attr('type', 'password');
-                    $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+                    console.error('Input field not found for toggle button:', $inputGroup);
                 }
             });
 
             // Xử lý ẩn/hiện thông báo lỗi
             var errorSummary = $('#loginErrorSummary');
-            if (errorSummary.length) { // Kiểm tra xem phần tử có tồn tại không
-                // Nếu khối lỗi được render và có nội dung (không chỉ là whitespace)
+            if (errorSummary.length) {
                 if ($.trim(errorSummary.text()).length > 0) {
-                    errorSummary.removeClass('d-none'); // Đảm bảo nó được hiển thị nếu có lỗi
-                                                       // và ban đầu bạn ẩn nó bằng class d-none
+                    errorSummary.removeClass('d-none');
                 } else {
-                    // Nếu khối lỗi được render nhưng trống, ẩn nó đi
                     errorSummary.addClass('d-none');
                 }
             }
