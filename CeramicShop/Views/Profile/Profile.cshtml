@@ -1,3 +1,14 @@
+@model CeramicShop.Models.User
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap4-comment/avatar1.webp"
+                         alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                    <h5 class="my-3">@Model.FullName</h5>
+                    <p class="text-muted mb-1">@Model.Role</p>
                     <div class="d-flex justify-content-center mb-2">
                         <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                             <i class="fas fa-edit me-1"></i>Chỉnh sửa hồ sơ
@@ -8,4 +19,137 @@
                                 <i class="fas fa-user-shield me-2"></i>Quản lý Admin
                             </a>
                         }
-                    </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Họ và tên</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@Model.FullName</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Email</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@Model.Email</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Số điện thoại</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@(Model.Phone ?? "Chưa cập nhật")</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Địa chỉ</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-muted mb-0">@(Model.Address ?? "Chưa cập nhật")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Chỉnh sửa hồ sơ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UpdateProfile" asp-controller="Account" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="FullName" class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" id="FullName" name="FullName" value="@Model.FullName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Phone" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="Phone" name="Phone" value="@Model.Phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Address" class="form-label">Địa chỉ</label>
+                        <textarea class="form-control" id="Address" name="Address" rows="3">@Model.Address</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.SuccessMessage != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @ViewBag.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @ViewBag.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove any existing backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+
+            // Handle modal open
+            document.querySelector('[data-bs-toggle="modal"]').addEventListener('click', function() {
+                document.getElementById('editProfileModal').style.display = 'block';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            });
+
+            // Handle modal close
+            document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.getElementById('editProfileModal').style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                });
+            });
+        });
+    </script>
+} 

@@ -63,9 +63,6 @@
                                 <dt class="col-sm-5">Tổng tiền</dt>
                                 <dd class="col-sm-7">@Model.TotalAmount.ToString("N0") VNĐ</dd>
 
-                                <dt class="col-sm-5">Cập nhật lần cuối</dt>
-                                <dd class="col-sm-7">@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa cập nhật")</dd>
-
                                 <dt class="col-sm-5">Ghi chú</dt>
                                 <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.Notes) ? "Không có" : Model.Notes)</dd>
                             </dl>
@@ -99,7 +96,7 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     @{
-                                                        var productImage = item.Product?.ProductImages?.FirstOrDefault(pi => pi.IsMainImage)?.ImagePath ?? "/Images/no-image.jpg";
+                                                        var productImage = item.Product?.ProductImages?.FirstOrDefault(pi => pi.IsMainImage)?.ImagePath ?? "no-image.jpg";
                                                     }
                                                     <img src="/Images/@productImage" alt="@item.Product?.ProductName" class="mr-2" style="width: 50px; height: 50px; object-fit: cover;">
                                                     <div>
