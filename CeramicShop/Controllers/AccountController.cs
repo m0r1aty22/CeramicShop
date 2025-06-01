@@ -43,29 +43,101 @@ namespace CeramicShop.Controllers
                 return View();
             }
 
-            // Lấy thông tin người dùng
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            if (user == null || !VerifyPassword(password, user.Password))
+            {
+                ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không hợp lệ.");
+                return View();
+            }
 
+            // --- Bước gửi OTP qua email ---
+            var otp = GenerateOTP();
+            HttpContext.Session.SetString($"OTP_{user.Email}", otp);
+            HttpContext.Session.SetString($"OTPExpiry_{user.Email}", DateTime.Now.AddMinutes(15).ToString());
+            HttpContext.Session.SetString("LoginUserName", user.UserName);
+            HttpContext.Session.SetString("LoginRememberMe", rememberMe.ToString());
+            HttpContext.Session.SetString("LoginReturnUrl", returnUrl ?? "");
+
+            var subject = "Mã xác thực đăng nhập - 2FA";
+            var message = $@"
+        <html>
+        <body>
+            <p>Chào {user.UserName},</p>
+            <p>Mã xác thực đăng nhập của bạn là:</p>
+            <h2>{otp}</h2>
+            <p>Mã này có hiệu lực trong 15 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>
+        </body>
+        </html>";
+
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, subject, message);
+                TempData["SuccessMessage"] = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư và nhập mã OTP để đăng nhập.";
+                return RedirectToAction("VerifyLoginOTP");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi gửi mã OTP qua email. Vui lòng thử lại.");
+                return View();
+            }
+        }
+        [HttpGet]
+        public IActionResult VerifyLoginOTP()
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("LoginUserName")))
+            {
+                // Nếu chưa có username trong session thì redirect về login
+                return RedirectToAction("Login");
+            }
+
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyLoginOTP(string otpInput)
+        {
+            var username = HttpContext.Session.GetString("LoginUserName");
+            var rememberMeString = HttpContext.Session.GetString("LoginRememberMe");
+            var returnUrl = HttpContext.Session.GetString("LoginReturnUrl");
+            bool rememberMe = bool.TryParse(rememberMeString, out var rm) && rm;
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(otpInput))
+            {
+                ModelState.AddModelError("", "Mã OTP là bắt buộc.");
+                return View();
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
             if (user == null)
             {
-                ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không hợp lệ.");
-                return View();
+                TempData["ErrorMessage"] = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.";
+                return RedirectToAction("Login");
             }
 
-            // Kiểm tra mật khẩu đã mã hóa
-            if (!VerifyPassword(password, user.Password))
+            var storedOTP = HttpContext.Session.GetString($"OTP_{user.Email}");
+            var expiryString = HttpContext.Session.GetString($"OTPExpiry_{user.Email}");
+
+            if (string.IsNullOrEmpty(storedOTP) || string.IsNullOrEmpty(expiryString) ||
+                !DateTime.TryParse(expiryString, out var expiry) || expiry < DateTime.Now)
             {
-                ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không hợp lệ.");
+                TempData["ErrorMessage"] = "Mã OTP đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại để lấy mã mới.";
+                return RedirectToAction("Login");
+            }
+
+            if (otpInput != storedOTP)
+            {
+                ModelState.AddModelError("", "Mã OTP không chính xác. Vui lòng thử lại.");
                 return View();
             }
 
+            // Xác thực thành công, đăng nhập người dùng
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
-            };
+    };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties
@@ -78,6 +150,13 @@ namespace CeramicShop.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
+
+            // Xoá session OTP và login tạm thời
+            HttpContext.Session.Remove($"OTP_{user.Email}");
+            HttpContext.Session.Remove($"OTPExpiry_{user.Email}");
+            HttpContext.Session.Remove("LoginUserName");
+            HttpContext.Session.Remove("LoginRememberMe");
+            HttpContext.Session.Remove("LoginReturnUrl");
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {

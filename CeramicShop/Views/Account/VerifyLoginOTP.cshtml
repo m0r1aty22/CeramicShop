@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Xác thực OTP đăng nhập";
+}
+
+<h2>Xác thực OTP đăng nhập</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form method="post" asp-action="VerifyLoginOTP">
+    <div class="form-group">
+        <label for="otpInput">Nhập mã OTP</label>
+        <input type="text" class="form-control" id="otpInput" name="otpInput" required maxlength="6" />
+    </div>
+    <button type="submit" class="btn btn-primary">Xác nhận</button>
+</form>
