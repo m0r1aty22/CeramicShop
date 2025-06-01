@@ -4,13 +4,13 @@
     ViewBag.Title = "Hồ sơ người dùng";
 }
 
-<div class="container py-5">
+<div class="profile-container">
     <div class="row">
         <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-body text-center"" style="padding: 15px;">
+            <div class="card profile-avatar-card mb-4">
+                <div class="card-body text-center">
                     <img src="/Images/MKD.png" alt="avatar"
-                         class="rounded-circle img-fluid" style="width: 150px;">
+                         class="rounded-circle img-fluid profile-avatar">
                     <h5 class="my-3">@Model.FullName</h5>
                     <p class="text-muted mb-1">@Model.UserName</p>
                     <p class="text-muted mb-4">@(string.IsNullOrEmpty(Model.Address) ? "Chưa cập nhật địa chỉ" : Model.Address)</p>
@@ -18,7 +18,7 @@
                         <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                             <i class="fas fa-edit me-1"></i>Chỉnh sửa hồ sơ
                         </button>
-                        @if (User.IsInRole("Admin")) // Kiểm tra vai trò của người dùng
+                        @if (User.IsInRole("Admin"))
                         {
                             <a href="@Url.Action("Index", "Admin")" class="btn btn-info">
                                 <i class="fas fa-user-shield me-1"></i>Trang Admin
@@ -27,22 +27,22 @@
                     </div>
                 </div>
             </div>
-            <div class="card mb-4 mb-lg-0">
+            <div class="card profile-menu-card mb-4">
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush rounded-3">
-                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <li class="list-group-item d-flex align-items-center">
                             <i class="fas fa-user fa-lg text-primary"></i>
                             <p class="mb-0">Tài khoản của tôi</p>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <li class="list-group-item d-flex align-items-center">
                             <i class="fas fa-shopping-bag fa-lg text-success"></i>
                             <a href="@Url.Action("TrackOrders", "Order")" class="mb-0 text-decoration-none">Đơn hàng của tôi</a>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <li class="list-group-item d-flex align-items-center">
                             <i class="fas fa-heart fa-lg text-danger"></i>
                             <a href="@Url.Action("Index", "Wishlist")" class="mb-0 text-decoration-none">Danh sách yêu thích</a>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <li class="list-group-item d-flex align-items-center">
                             <i class="fas fa-key fa-lg text-warning"></i>
                             <a href="#" class="mb-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Đổi mật khẩu</a>
                         </li>
@@ -51,58 +51,66 @@
             </div>
         </div>
         <div class="col-lg-8">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin cá nhân</h5>
+            <div class="card profile-info-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i>Thông tin cá nhân</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <p class="mb-0 fw-bold">Họ và tên</p>
-                        </div>
-                        <div class="col-sm-9">
-                            <p class="text-muted mb-0">@Model.FullName</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <p class="mb-0 fw-bold">Email</p>
-                        </div>
-                        <div class="col-sm-9">
-                            <p class="text-muted mb-0">@Model.Email</p>
+                    <div class="profile-info-row">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="profile-info-label mb-0">Họ và tên</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">@Model.FullName</p>
+                            </div>
                         </div>
                     </div>
                     <hr>
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <p class="mb-0 fw-bold">Số điện thoại</p>
-                        </div>
-                        <div class="col-sm-9">
-                            <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.Phone) ? "Chưa cập nhật" : Model.Phone)</p>
+                    <div class="profile-info-row">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="profile-info-label mb-0">Email</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">@Model.Email</p>
+                            </div>
                         </div>
                     </div>
                     <hr>
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <p class="mb-0 fw-bold">Địa chỉ</p>
+                    <div class="profile-info-row">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="profile-info-label mb-0">Số điện thoại</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.Phone) ? "Chưa cập nhật" : Model.Phone)</p>
+                            </div>
                         </div>
-                        <div class="col-sm-9">
-                            <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.Address) ? "Chưa cập nhật" : Model.Address)</p>
+                    </div>
+                    <hr>
+                    <div class="profile-info-row">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="profile-info-label mb-0">Địa chỉ</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.Address) ? "Chưa cập nhật" : Model.Address)</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Đơn hàng gần đây</h5>
+            <div class="card profile-info-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i>Đơn hàng gần đây</h5>
                 </div>
                 <div class="card-body">
                     @if (ViewBag.RecentOrders != null && ViewBag.RecentOrders.Count > 0)
                     {
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
+                            <table class="table table-hover recent-orders-table">
+                                <thead>
                                     <tr>
                                         <th>Mã đơn hàng</th>
                                         <th>Ngày đặt</th>
@@ -170,7 +178,7 @@
 </div>
 
 <!-- Edit Profile Modal -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+<div class="modal fade profile-modal" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
@@ -224,7 +232,7 @@
 </div>
 
 <!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+<div class="modal fade profile-modal" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
@@ -275,7 +283,7 @@
 </div>
 
 <!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade profile-modal" id="successModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
@@ -293,7 +301,7 @@
 </div>
 
 <!-- Error Modal -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade profile-modal" id="errorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">

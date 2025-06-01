@@ -5,15 +5,15 @@
 
 <div class="wishlist-container">
     <div class="section-title">
-        <h2>Danh sách yêu thích</h2>
+        <h2><i class="fas fa-heart me-2"></i>Danh sách yêu thích</h2>
     </div>
 
     <div id="wishlist-items-container">
         @if (Model != null && Model.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover wishlist-table">
-                    <thead class="table-light">
+                <table class="table wishlist-table">
+                    <thead>
                         <tr>
                             <th>Sản phẩm</th>
                             <th>Giá</th>
@@ -28,21 +28,21 @@
                             <tr id="wishlist-item-@item.ProductID" class="wishlist-item" data-product-id="@item.ProductID">
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="wishlist-item-image me-3">
+                                        <div class="wishlist-item-image">
                                             <a href="@Url.Action("Details", "Product", new { id = item.ProductID })">
-                                                <img src="/Images/@item.MainImagePath" alt="@item.ProductName" class="img-fluid" style="max-width: 80px;">
+                                                <img src="/Images/@item.MainImagePath" alt="@item.ProductName">
                                             </a>
                                         </div>
-                                        <div>
-                                            <h5 class="mb-1">
-                                                <a href="@Url.Action("Details", "Product", new { id = item.ProductID })" class="text-decoration-none">
+                                        <div class="ms-3">
+                                            <h5>
+                                                <a href="@Url.Action("Details", "Product", new { id = item.ProductID })">
                                                     @item.ProductName
                                                 </a>
                                             </h5>
-                                            <div class="small text-muted">
-                                                <span>Danh mục: </span>
-                                                <a href="@Url.Action("Index", "Product", new { categoryName = item.CategoryName })" class="text-decoration-none">@item.CategoryName</a> /
-                                                <a href="@Url.Action("Index", "Product", new { subCategoryName = item.SubCategoryName })" class="text-decoration-none">@item.SubCategoryName</a>
+                                            <div class="text-muted">
+                                                <i class="fas fa-tag me-1"></i>
+                                                <a href="@Url.Action("Index", "Product", new { categoryName = item.CategoryName })">@item.CategoryName</a> /
+                                                <a href="@Url.Action("Index", "Product", new { subCategoryName = item.SubCategoryName })">@item.SubCategoryName</a>
                                             </div>
                                         </div>
                                     </div>
@@ -50,7 +50,9 @@
                                 <td>
                                     @if (item.HasSpecificPromotion && item.DiscountPercentage.HasValue)
                                     {
-                                        <div class="discount-badge">-@item.DiscountPercentage%</div>
+                                        <div class="discount-badge">
+                                            <i class="fas fa-tag me-1"></i>-@item.DiscountPercentage%
+                                        </div>
                                         <div>
                                             <span class="original-price">@item.Price.ToString("N0") VNĐ</span>
                                             <span class="current-price">@item.DiscountedPrice.Value.ToString("N0") VNĐ</span>
@@ -64,22 +66,29 @@
                                 <td>
                                     @if (item.StockQuantity > 0)
                                     {
-                                        <span class="badge bg-success">Còn hàng</span>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Còn hàng
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">Hết hàng</span>
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Hết hàng
+                                        </span>
                                     }
                                 </td>
                                 <td>
-                                    <small class="text-muted">@item.AddedToWishlistAt?.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock me-1"></i>
+                                        @item.AddedToWishlistAt?.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <button class="btn btn-primary btn-sm move-to-cart" data-product-id="@item.ProductID" @(item.StockQuantity <= 0 ? "disabled" : "")>
+                                        <button class="btn btn-primary move-to-cart" data-product-id="@item.ProductID" @(item.StockQuantity <= 0 ? "disabled" : "")>
                                             <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
                                         </button>
-                                        <button class="btn btn-outline-danger btn-sm remove-from-wishlist" data-product-id="@item.ProductID" data-product-name="@item.ProductName">
+                                        <button class="btn btn-outline-danger remove-from-wishlist" data-product-id="@item.ProductID" data-product-name="@item.ProductName">
                                             <i class="fas fa-trash-alt"></i> Xóa
                                         </button>
                                     </div>
@@ -92,12 +101,12 @@
         }
         else
         {
-            <div class="empty-wishlist text-center py-5">
-                <i class="fas fa-heart fa-5x mb-3 text-muted"></i>
+            <div class="empty-wishlist">
+                <i class="fas fa-heart"></i>
                 <h3>Danh sách yêu thích trống</h3>
                 <p class="text-muted">Danh sách yêu thích của bạn hiện đang trống.</p>
-                <a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">
-                    <i class="fas fa-shopping-cart me-2"></i> Tiếp tục mua sắm
+                <a href="@Url.Action("Index", "Product")" class="btn btn-primary">
+                    <i class="fas fa-shopping-cart me-2"></i>Tiếp tục mua sắm
                 </a>
             </div>
         }
@@ -105,19 +114,25 @@
 </div>
 
 <!-- Xác nhận xóa Modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+<div class="modal fade wishlist-modal" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa</h5>
+                <h5 class="modal-title" id="confirmDeleteModalLabel">
+                    <i class="fas fa-trash-alt me-2"></i>Xác nhận xóa
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Bạn có chắc chắn muốn xóa <span id="deleteProductName" class="fw-bold"></span> khỏi danh sách yêu thích?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-danger" id="confirmDelete">Xóa</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash-alt me-2"></i>Xóa
+                </button>
             </div>
         </div>
     </div>
@@ -162,12 +177,12 @@
                                 // Kiểm tra nếu không còn sản phẩm nào
                                 if ($('.wishlist-item').length === 0) {
                                     $('#wishlist-items-container').html(
-                                        '<div class="empty-wishlist text-center py-5">' +
-                                        '<i class="fas fa-heart fa-5x mb-3 text-muted"></i>' +
+                                        '<div class="empty-wishlist">' +
+                                        '<i class="fas fa-heart"></i>' +
                                         '<h3>Danh sách yêu thích trống</h3>' +
                                         '<p class="text-muted">Danh sách yêu thích của bạn hiện đang trống.</p>' +
-                                        '<a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">' +
-                                        '<i class="fas fa-shopping-cart me-2"></i> Tiếp tục mua sắm' +
+                                        '<a href="@Url.Action("Index", "Product")" class="btn btn-primary">' +
+                                        '<i class="fas fa-shopping-cart me-2"></i>Tiếp tục mua sắm' +
                                         '</a>' +
                                         '</div>'
                                     );
@@ -212,12 +227,12 @@
                                 // Kiểm tra nếu không còn sản phẩm nào
                                 if ($('.wishlist-item').length === 0) {
                                     $('#wishlist-items-container').html(
-                                        '<div class="empty-wishlist text-center py-5">' +
-                                        '<i class="fas fa-heart fa-5x mb-3 text-muted"></i>' +
+                                        '<div class="empty-wishlist">' +
+                                        '<i class="fas fa-heart"></i>' +
                                         '<h3>Danh sách yêu thích trống</h3>' +
                                         '<p class="text-muted">Danh sách yêu thích của bạn hiện đang trống.</p>' +
-                                        '<a href="@Url.Action("Index", "Product")" class="btn btn-primary mt-3">' +
-                                        '<i class="fas fa-shopping-cart me-2"></i> Tiếp tục mua sắm' +
+                                        '<a href="@Url.Action("Index", "Product")" class="btn btn-primary">' +
+                                        '<i class="fas fa-shopping-cart me-2"></i>Tiếp tục mua sắm' +
                                         '</a>' +
                                         '</div>'
                                     );

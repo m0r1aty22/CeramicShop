@@ -41,7 +41,7 @@
                                         <tr data-product-id="@item.ProductID">
                                             <td>
                                                 <div class="cart-product">
-                                                    <img src="/Images/@item.ImagePath" alt="@item.ProductName" class="cart-product-image">
+                                                    <img class="cart-image" src="/Images/@item.ImagePath" alt="@item.ProductName" class="cart-product-image">
                                                     <div class="cart-product-info">
                                                         <h5 class="cart-product-title">@item.ProductName</h5>
                                                     </div>
@@ -140,7 +140,9 @@
     <script>
         $(document).ready(function() {
             // Update quantity
-            $('.increase-quantity, .decrease-quantity').click(function() {
+            $('.increase-quantity, .decrease-quantity').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 var row = $(this).closest('tr');
                 var quantityInput = row.find('.item-quantity');
                 var currentQuantity = parseInt(quantityInput.val());
@@ -154,8 +156,10 @@
                 updateCartItem(row);
             });
 
-            $('.item-quantity').change(function() {
+            $('.item-quantity').on('change input', function() {
                 var row = $(this).closest('tr');
+                var value = parseInt($(this).val());
+                if (isNaN(value) || value < 1) $(this).val(1);
                 updateCartItem(row);
             });
 
