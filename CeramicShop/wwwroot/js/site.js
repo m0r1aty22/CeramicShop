@@ -186,29 +186,6 @@ function setupEventHandlers() {
         $("#" + tabId).addClass("active")
     })
 
-    // Quantity buttons
-    $(document).on("click", "#decreaseQuantity", () => {
-        var quantityInput = $("#quantity")
-        var currentValue = Number.parseInt(quantityInput.val())
-        if (currentValue > 1) {
-            quantityInput.val(currentValue - 1).trigger("change")
-        }
-    })
-
-    $(document).on("click", "#increaseQuantity", () => {
-        var quantityInput = $("#quantity")
-        var currentValue = Number.parseInt(quantityInput.val())
-        var maxStock = Number.parseInt(quantityInput.attr("max"))
-        if (currentValue < maxStock) {
-            quantityInput.val(currentValue + 1).trigger("change")
-        }
-    })
-
-    // Quantity input change
-    $(document).on("change", "#quantity", () => {
-        updateTotalPrice()
-    })
-
     // Rating stars
     setupRatingStars()
 
@@ -864,26 +841,6 @@ function setupAccountFunctionality() {
 // ===== CART FUNCTIONS FROM CART.JS =====
 
 function setupCartFunctionality() {
-    // Update quantity
-    $(".increase-quantity, .decrease-quantity").click(function () {
-        var row = $(this).closest("tr")
-        var quantityInput = row.find(".item-quantity")
-        var currentQuantity = Number.parseInt(quantityInput.val())
-
-        if ($(this).hasClass("increase-quantity")) {
-            quantityInput.val(currentQuantity + 1)
-        } else if (currentQuantity > 1) {
-            quantityInput.val(currentQuantity - 1)
-        }
-
-        updateCartItem(row)
-    })
-
-    $(".item-quantity").change(function () {
-        var row = $(this).closest("tr")
-        updateCartItem(row)
-    })
-
     // Remove item
     $(".remove-item").click(function () {
         var row = $(this).closest("tr")
@@ -971,58 +928,6 @@ function setupCartFunctionality() {
                 window.showNotification("Lỗi khi áp dụng mã giảm giá.", "danger", "Lỗi")
             },
         })
-    })
-}
-
-// Function to update cart item
-function updateCartItem(row) {
-    var productId = row.data("product-id")
-    var quantity = Number.parseInt(row.find(".item-quantity").val())
-    var unitPrice = Number.parseFloat(row.find(".price").text().replace(/[^\d]/g, ""))
-
-    // Add loading indicator
-    row.addClass("updating")
-
-    $.ajax({
-        url: "/Cart/UpdateQuantity",
-        type: "POST",
-        data: { productId: productId, quantity: quantity },
-        success: (data) => {
-            if (data.success) {
-                // Update item total
-                row.find(".item-total").text(data.itemTotal.toLocaleString("vi-VN") + " VNĐ")
-
-                // Update cart totals
-                $(".cart-subtotal, .cart-total").text(data.cartTotal.toLocaleString("vi-VN") + " VNĐ")
-                $(".cart-count").text(data.cartCount)
-
-                // If there's a discount, recalculate it
-                if ($(".discount-row").length > 0) {
-                    var discountPercentage = Number.parseFloat($(".discount-percentage").text())
-                    var subtotal = data.cartTotal
-                    var discount = subtotal * (discountPercentage / 100)
-                    var total = subtotal - discount
-
-                    $(".cart-discount").text("-" + discount.toLocaleString("vi-VN") + " VNĐ")
-                    $(".cart-total").text(total.toLocaleString("vi-VN") + " VNĐ")
-                }
-
-                // Show success indicator
-                row.removeClass("updating").addClass("update-success")
-                setTimeout(() => {
-                    row.removeClass("update-success")
-                }, 1000)
-            } else {
-                window.showNotification(data.message, "danger", "Lỗi")
-                // Reset quantity
-                row.find(".item-quantity").val(row.find(".item-quantity").data("original-value"))
-                row.removeClass("updating")
-            }
-        },
-        error: () => {
-            window.showNotification("Lỗi khi cập nhật giỏ hàng.", "danger", "Lỗi")
-            row.removeClass("updating")
-        },
     })
 }
 

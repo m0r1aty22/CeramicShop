@@ -21,40 +21,60 @@
     <header class="main-header">
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
-                <!-- Giả sử logo nằm trong wwwroot/Images/ -->
                 <a class="navbar-brand" href="@Url.Action("Index", "Home")">
-                    <img src="~/Images/CeramicShopLogo.png" alt="" class="main-logo-img" />
+                    <img src="~/Images/CeramicShopLogo.jpg" alt="CeramicShop" class="main-logo-img" />
                 </a>
+
                 <button class="navbar-toggler mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <form class="d-flex mx-auto search-form" action="@Url.Action("Index", "Product")" method="get">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm sản phẩm..." name="searchTerm" value="@ViewBag.SearchTerm">
-                            <button class="btn btn-light" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
+
+                    <form class="search-form" action="@Url.Action("Index", "Product")" method="get">
+                        <input type="text" class="form-control" id="searchInput" 
+                               placeholder="Tìm kiếm sản phẩm..." name="searchTerm" 
+                               value="@ViewBag.SearchTerm">
+                        <button class="btn" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </form>
+
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="@Url.Action("TrackOrders", "Order")">
-                                <i class="fas fa-truck"></i> <span class="d-none d-md-inline">Theo dõi đơn hàng</span>
+                                <i class="fas fa-truck"></i> <span class="d-none d-md-inline">Đơn hàng</span>
                             </a>
                         </li>
+
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user"></i> <span class="d-none d-md-inline">@User.Identity.Name</span>
+                            <li class="nav-item dropdown user-dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle"></i> <span class="d-none d-md-inline">@User.Identity.Name</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="@Url.Action("Profile", "Account")">Hồ sơ</a></li>
-                                    <li><a class="dropdown-item" href="@Url.Action("TrackOrders", "Order")">Đơn hàng của tôi</a></li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Wishlist")">Danh sách yêu thích</a></li>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
+                                            <i class="fas fa-user"></i> Hồ sơ
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("TrackOrders", "Order")">
+                                            <i class="fas fa-box"></i> Đơn hàng của tôi
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Index", "Wishlist")">
+                                            <i class="fas fa-heart"></i> Yêu thích
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")">Đăng xuất</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Logout", "Account")">
+                                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         }
@@ -66,10 +86,11 @@
                                 </a>
                             </li>
                         }
+
                         <li class="nav-item">
                             <a class="nav-link cart-link" href="@Url.Action("Index", "Cart")">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span class="d-none d-md-inline"></span>
+                                <span class="d-none d-md-inline">Giỏ hàng</span>
                                 <span class="cart-count">0</span>
                             </a>
                         </li>

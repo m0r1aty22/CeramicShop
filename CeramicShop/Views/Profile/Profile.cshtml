@@ -1,0 +1,11 @@
+                    <div class="d-flex justify-content-center mb-2">
+                        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-edit me-1"></i>Chỉnh sửa hồ sơ
+                        </button>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a href="@Url.Action("Index", "Admin")" class="btn btn-danger">
+                                <i class="fas fa-user-shield me-2"></i>Quản lý Admin
+                            </a>
+                        }
+                    </div> 

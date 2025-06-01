@@ -23,6 +23,16 @@
 }
 
 <div class="container-fluid">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <a href="@Url.Action("Index", "Admin")" class="btn btn-primary">
+                    <i class="fas fa-user-shield me-2"></i>Quản lý Admin
+                </a>
+            </div>
+        </div>
+    }
     <div class="row">
         <!-- Sidebar -->
         <div class="col-lg-3">
