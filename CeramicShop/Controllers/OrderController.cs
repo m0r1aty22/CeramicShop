@@ -55,7 +55,7 @@ namespace CeramicShop.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> PlaceOrder(int paymentMethodId, string shippingAddress, string notes)
+        public async Task<IActionResult> PlaceOrder(int paymentMethodId, string shippingAddress, string notes, string gencode)
         {
             try
             {
@@ -119,7 +119,8 @@ namespace CeramicShop.Controllers
                     Notes = notes ?? string.Empty,
                     CreatedAt = now,
                     UpdatedAt = now,
-                    ShippingAddress = shippingAddress ?? string.Empty
+                    ShippingAddress = shippingAddress ?? string.Empty,
+                    Code = gencode
                 };
 
 

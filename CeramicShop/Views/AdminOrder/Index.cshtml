@@ -91,6 +91,7 @@
                             <th>Phương thức thanh toán</th>
                             <th>Trạng thái</th>
                             <th>Ngày đặt</th>
+                            <th>Code (Banking)</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -132,6 +133,7 @@
                                     }
                                 </td>
                                 <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@order.Code</td>
                                 <td>
                                     <div class="btn-group">
                                         <a href="@Url.Action("Edit", new { id = order.OrderID })" class="btn btn-sm btn-info" data-toggle="tooltip" title="Chỉnh sửa">

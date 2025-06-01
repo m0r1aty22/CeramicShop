@@ -50,11 +50,7 @@
                                     <option value="@item.Value">@item.Text</option>
                                 }
                             </select>
-                            <!--nếu item.Text = Chuyển khoản thì ajax, disable ẩn button đặt hàng ở dưới đi load img src sau, gọi hàm genCode ở controller checkout tạo 15 kí tự ngẫu nhiên ra để load vào image dưới đây-->
-                            <!--https://qr.sepay.vn/img?acc=0888804118888&bank=MB&amount={ViewBag.DiscountedTotal.ToString("N0")}&des={genCode load về}-->
-                            <!--sau đó thì cho chờ 1 phút-->
-                            <!--Trong lúc chờ 1 phút thì ở controller chờ 10s, sau đó mỗi 3s thì call api lên server webhooks để check với hàm checkDH(int ViewBag.DiscountedTotal, string gencode)-->
-
+                            <input type="hidden" name="gencode" id="gencodeInput" />
                         </div>
                     </form>
                 </div>
@@ -104,6 +100,7 @@
                     <div id="qr-section" class="mt-3 d-none">
                         <div class="text-center">
                             <img id="qrImage" src="" alt="QR Code" class="img-fluid mb-2" style="max-width: 300px;" />
+                            
                             <p>Đang chờ xác nhận thanh toán... Vui lòng quét mã QR.</p>
                             <p id="countdownTimer" class="text-danger fw-bold mt-2"></p>
                         </div>
@@ -187,7 +184,8 @@
                                             clearInterval(checkInterval);
                                             clearInterval(countdownInterval);
                                             alert("Xác nhận thanh toán thành công! Đang xử lý đơn hàng...");
-                                            $('#checkoutForm').submit(); // submit luôn
+                                            $('#gencodeInput').val(gencode);
+                                            $('#checkoutForm').submit(); 
                                         }
                                     }
                                 });
