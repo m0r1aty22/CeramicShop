@@ -47,7 +47,11 @@
                                     <option value="@item.Value">@item.Text</option>
                                 }
                             </select>
-                            <!--nếu item.Value = Chuyển khoản thì-->
+                            <!--nếu item.Text = Chuyển khoản thì ajax, disable ẩn button đặt hàng ở dưới đi load img src sau, gọi hàm genCode ở controller checkout tạo 15 kí tự ngẫu nhiên ra để load vào image dưới đây-->
+                            <!--https://qr.sepay.vn/img?acc=0888804118888&bank=MB&amount={ViewBag.DiscountedTotal.ToString("N0")}&des={genCode load về}-->
+                            <!--sau đó thì cho chờ 1 phút-->
+                            <!--Trong lúc chờ 1 phút thì ở controller chờ 10s, sau đó mỗi 3s thì call api lên server webhooks để check với hàm checkDH(int ViewBag.DiscountedTotal, string gencode)-->
+
                         </div>
                     </form>
                 </div>
