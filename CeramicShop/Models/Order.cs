@@ -35,6 +35,8 @@ namespace CeramicShop.Models
         [StringLength(500)]
         public string ShippingAddress { get; set; } = string.Empty; // Default value
 
+        public string? Code { get; set; }
+
         // Navigation properties
         [ForeignKey("UserID")]
         public virtual User User { get; set; }

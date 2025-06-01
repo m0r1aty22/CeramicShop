@@ -28,7 +28,7 @@ namespace CeramicShop.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=THAITUANN\\SQLEXPRESS;Initial Catalog=CeramicShop;Integrated Security=True;");
+                optionsBuilder.UseSqlServer("Data Source=103.82.36.41,1433;Initial Catalog=CeramicShop;Persist Security Info=True;User ID=sa;Password=123321Es;Trust Server Certificate=True");
             }
         }
 
@@ -54,7 +54,7 @@ namespace CeramicShop.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
-
+            modelBuilder.Entity<Category>().ToTable("Categories");
             // Cấu hình mối quan hệ và hành vi xóa
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.SubCategories)
@@ -198,6 +198,7 @@ namespace CeramicShop.Data
                 .Property(r => r.Rating)
                 .IsRequired()
                 .HasAnnotation("CheckConstraint", "Rating >= 1 AND Rating <= 5");
+            
         }
     }
 }
