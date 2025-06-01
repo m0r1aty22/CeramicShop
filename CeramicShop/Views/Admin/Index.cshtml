@@ -4,6 +4,158 @@
     Layout = "_AdminLayout";
 }
 
+<style>
+    /* Dashboard Cards */
+    .dashboard-card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .dashboard-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .dashboard-card h5 {
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .dashboard-card .small {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .dashboard-card i {
+        opacity: 0.8;
+        font-size: 2.5rem;
+    }
+
+    .dashboard-card .card-footer {
+        background: rgba(0,0,0,0.1);
+        border-top: none;
+        padding: 0.8rem 1.5rem;
+    }
+
+    /* Chart Cards */
+    .chart-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .chart-card .card-header {
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .chart-card .card-header i {
+        margin-right: 10px;
+        color: var(--primary);
+    }
+
+    .chart-card .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Tables */
+    .table-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .table-card .card-header {
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+    }
+
+    .table-responsive {
+        padding: 0.5rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        border-top: none;
+        background: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: #495057;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+
+    .breadcrumb-item {
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb-item.active {
+        color: var(--primary);
+    }
+
+    /* Page Title */
+    h1 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 0.5em 1em;
+        font-weight: 500;
+        border-radius: 30px;
+    }
+
+    /* Animation */
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dashboard-card, .chart-card, .table-card {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    /* Chart Containers */
+    .chart-container {
+        position: relative;
+        min-height: 350px;
+        width: 100%;
+    }
+
+    .chart-card .card-body {
+        padding: 1.5rem;
+        height: 100%;
+    }
+</style>
+
 <div class="container-fluid">
     <h1 class="mt-4">Bảng điều khiển</h1>
     <ol class="breadcrumb mb-4">
@@ -21,7 +173,7 @@
                             <div class="small">Sản phẩm</div>
                         </div>
                         <div>
-                            <i class="fas fa-box fa-2x"></i>
+                            <i class="fas fa-box"></i>
                         </div>
                     </div>
                 </div>
@@ -40,7 +192,7 @@
                             <div class="small">Khách hàng</div>
                         </div>
                         <div>
-                            <i class="fas fa-users fa-2x"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
                 </div>
@@ -59,7 +211,7 @@
                             <div class="small">Đơn hàng</div>
                         </div>
                         <div>
-                            <i class="fas fa-shopping-cart fa-2x"></i>
+                            <i class="fas fa-shopping-cart"></i>
                         </div>
                     </div>
                 </div>
@@ -78,7 +230,7 @@
                             <div class="small">Doanh thu</div>
                         </div>
                         <div>
-                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                            <i class="fas fa-money-bill-wave"></i>
                         </div>
                     </div>
                 </div>
@@ -93,24 +245,28 @@
     <!-- Biểu đồ -->
     <div class="row">
         <div class="col-xl-6">
-            <div class="card mb-4">
+            <div class="card chart-card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-chart-bar mr-1"></i>
+                    <i class="fas fa-chart-bar"></i>
                     Đơn hàng theo tháng
                 </div>
                 <div class="card-body">
-                    <canvas id="ordersChart" width="100%" height="40"></canvas>
+                    <div class="chart-container">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-xl-6">
-            <div class="card mb-4">
+            <div class="card chart-card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-chart-line mr-1"></i>
+                    <i class="fas fa-chart-line"></i>
                     Doanh thu theo tháng
                 </div>
                 <div class="card-body">
-                    <canvas id="revenueChart" width="100%" height="40"></canvas>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -119,7 +275,7 @@
     <!-- Đơn hàng gần đây và sản phẩm bán chạy -->
     <div class="row">
         <div class="col-xl-6">
-            <div class="card mb-4">
+            <div class="card table-card mb-4">
                 <div class="card-header">
                     <i class="fas fa-table mr-1"></i>
                     Đơn hàng gần đây
@@ -176,7 +332,7 @@
             </div>
         </div>
         <div class="col-xl-6">
-            <div class="card mb-4">
+            <div class="card table-card mb-4">
                 <div class="card-header">
                     <i class="fas fa-chart-pie mr-1"></i>
                     Sản phẩm bán chạy
@@ -210,8 +366,72 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Cấu hình chung cho biểu đồ
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#2c3e50',
+                    bodyColor: '#2c3e50',
+                    borderColor: '#e9ecef',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                if (context.dataset.label.includes('Doanh thu')) {
+                                    label += new Intl.NumberFormat('vi-VN', { 
+                                        style: 'currency', 
+                                        currency: 'VND' 
+                                    }).format(context.parsed.y);
+                                } else {
+                                    label += context.parsed.y;
+                                }
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
+            animations: {
+                tension: {
+                    duration: 1000,
+                    easing: 'linear'
+                }
+            }
+        };
+
         // Biểu đồ đơn hàng theo tháng
-        var ordersCtx = document.getElementById("ordersChart");
+        var ordersCtx = document.getElementById("ordersChart").getContext('2d');
+        var gradient = ordersCtx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(0, 123, 255, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 123, 255, 0.0)');
+
         var ordersChart = new Chart(ordersCtx, {
             type: 'bar',
             data: {
@@ -219,17 +439,37 @@
                 datasets: [{
                     label: 'Số đơn hàng',
                     data: [@string.Join(",", Model.MonthlyOrders.Select(x => x.Value))],
-                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                    backgroundColor: gradient,
                     borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 1
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    barThickness: 20,
+                    maxBarThickness: 25
                 }]
             },
             options: {
+                ...commonOptions,
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            borderDash: [2, 2]
+                        },
                         ticks: {
-                            precision: 0
+                            precision: 0,
+                            font: {
+                                size: 11
+                            }
                         }
                     }
                 }
@@ -237,7 +477,11 @@
         });
 
         // Biểu đồ doanh thu theo tháng
-        var revenueCtx = document.getElementById("revenueChart");
+        var revenueCtx = document.getElementById("revenueChart").getContext('2d');
+        var gradientRevenue = revenueCtx.createLinearGradient(0, 0, 0, 400);
+        gradientRevenue.addColorStop(0, 'rgba(40, 167, 69, 0.3)');
+        gradientRevenue.addColorStop(1, 'rgba(40, 167, 69, 0.0)');
+
         var revenueChart = new Chart(revenueCtx, {
             type: 'line',
             data: {
@@ -245,19 +489,57 @@
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
                     data: [@string.Join(",", Model.MonthlyRevenue.Select(x => x.Value))],
-                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    backgroundColor: gradientRevenue,
                     borderColor: 'rgba(40, 167, 69, 1)',
                     borderWidth: 2,
-                    tension: 0.1
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
+                ...commonOptions,
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            borderDash: [2, 2]
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return new Intl.NumberFormat('vi-VN', { 
+                                    style: 'currency', 
+                                    currency: 'VND',
+                                    maximumFractionDigits: 0
+                                }).format(value);
+                            },
+                            font: {
+                                size: 11
+                            }
+                        }
                     }
                 }
             }
+        });
+
+        // Thêm sự kiện resize để đảm bảo biểu đồ responsive
+        window.addEventListener('resize', function() {
+            ordersChart.resize();
+            revenueChart.resize();
         });
     </script>
 }
