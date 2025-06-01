@@ -178,6 +178,7 @@
 </div>
 
 <!-- Edit Profile Modal -->
+
 <div class="modal fade profile-modal" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -317,8 +318,17 @@
         </div>
     </div>
 </div>
-
 @section scripts {
+    <script>
+    $(document).ready(function () {
+        // Khi mở bất kỳ modal nào, xóa backdrop
+        $('.modal').on('shown.bs.modal', function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open'); // Ngăn cản cuộn bị khoá
+            $('body').css('padding-right', '0'); // Fix lỗi layout bị lệch
+        });
+    });
+    </script>
     <script>
         $(document).ready(function() {
 
