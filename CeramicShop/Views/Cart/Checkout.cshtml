@@ -4,9 +4,12 @@
     ViewBag.Title = "Checkout";
 }
 
+
+
+
+
 <div class="checkout-container">
     <h1 class="mb-4">Thanh toán</h1>
-
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-4">
@@ -98,7 +101,13 @@
                         <span>Tổng thanh toán</span>
                         <span>@ViewBag.DiscountedTotal.ToString("N0") VNĐ</span>
                     </div>
-
+                    <div id="qr-section" class="mt-3 d-none">
+                        <div class="text-center">
+                            <img id="qrImage" src="" alt="QR Code" class="img-fluid mb-2" style="max-width: 300px;" />
+                            <p>Đang chờ xác nhận thanh toán... Vui lòng quét mã QR.</p>
+                            <p id="countdownTimer" class="text-danger fw-bold mt-2"></p>
+                        </div>
+                    </div>
                     <button type="submit" form="checkoutForm" class="btn btn-primary w-100 mt-3">Đặt hàng</button>
                 </div>
             </div>
@@ -127,5 +136,70 @@
             </text>
         }
         });
+
+        // Khi thay đổi phương thức thanh toán
+        $('#paymentMethodId').on('change', function () {
+                var selected = $(this).find('option:selected').text();
+
+                if (selected === 'Chuyển khoản (Banking)') {
+                    $('button[type="submit"]').prop('disabled', true);
+                    $('#qr-section').removeClass('d-none');
+                    $('#countdownTimer').text('');
+
+                    $.ajax({
+                        url: '@Url.Action("GenerateCode", "Order")',
+                        method: 'GET',
+                        success: function (data) {
+                            var gencode = data.code;
+                            var amount = '@ViewBag.DiscountedTotal.ToString("N0")'.replace(/\./g, '').replace(',', '');
+                            var qrUrl = `https://qr.sepay.vn/img?acc=0888804118888&bank=MB&amount=${amount}&des=${gencode}`;
+                            $('#qrImage').attr('src', qrUrl);
+
+                            // Bắt đầu đếm ngược 5 phút
+                            var countdown = 300;
+                            var countdownInterval = setInterval(function () {
+                                var minutes = Math.floor(countdown / 60);
+                                var seconds = countdown % 60;
+                                $('#countdownTimer').text(`Thời gian chờ xác nhận: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+
+                                if (countdown <= 0) {
+                                    clearInterval(countdownInterval);
+                                    clearInterval(checkInterval);
+                                    $('#countdownTimer').text('Đã hết thời gian chờ xác nhận.');
+                                    alert("Quá thời gian chờ xác nhận thanh toán. Vui lòng thử lại.");
+                                    location.reload();
+                                }
+
+                                countdown--;
+                            }, 1000);
+
+                            // Bắt đầu kiểm tra thanh toán mỗi 5 giây
+                            var checkInterval = setInterval(function () {
+                                $.ajax({
+                                    url: '@Url.Action("checkPayment", "Order")',
+                                    method: 'POST',
+                                    data: {
+                                        amount: amount,
+                                        gencode: gencode
+                                    },
+                                    success: function (res) {
+                                        if (res.success) {
+                                            clearInterval(checkInterval);
+                                            clearInterval(countdownInterval);
+                                            alert("Xác nhận thanh toán thành công! Đang xử lý đơn hàng...");
+                                            $('#checkoutForm').submit(); // submit luôn
+                                        }
+                                    }
+                                });
+                            }, 5000);
+                        }
+                    });
+
+                } else {
+                    $('button[type="submit"]').prop('disabled', false);
+                    $('#qr-section').addClass('d-none');
+                    $('#countdownTimer').text('');
+                }
+            });
     </script>
 }

@@ -9,6 +9,9 @@ using CeramicShop.Models;
 using CeramicShop.Models.ViewModels;
 using System.Text.Json;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using System.Text;
+
 
 namespace CeramicShop.Controllers
 {
@@ -21,9 +24,38 @@ namespace CeramicShop.Controllers
         {
             _context = context;
         }
+        public JsonResult GenerateCode()
+        {
+            var code = Guid.NewGuid().ToString("N").Substring(0, 15); 
+            return Json(new { code });
+        }
 
         [HttpPost]
-        public IActionResult PlaceOrder(int paymentMethodId, string shippingAddress, string notes)
+        public async Task<JsonResult> CheckPayment(int amount, string gencode)
+        {
+            using var httpClient = new HttpClient();
+            var url = "http://103.82.36.41:5000/checkPayment";
+
+            var data = new
+            {
+                amount,
+                gencode
+            };
+
+            var response = await httpClient.PostAsJsonAsync(url, data);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<dynamic>();
+                return Json(result); 
+            }
+
+            return Json(new { success = false, message = "Server error" });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> PlaceOrder(int paymentMethodId, string shippingAddress, string notes)
         {
             try
             {
@@ -45,6 +77,16 @@ namespace CeramicShop.Controllers
                 var promoCode = HttpContext.Session.GetString("AppliedPromoCode");
                 var discountPercentageString = HttpContext.Session.GetString("PromoDiscountPercentage");
                 decimal discountPercentage = 0;
+                decimal systemWideDiscountPercentage = 0;
+
+                var systemWidePromotion = await _context.Promotions
+                    .FirstOrDefaultAsync(p => p.ProductID == null && p.IsActive
+                                           && p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now);
+
+                if (systemWidePromotion != null)
+                {
+                    systemWideDiscountPercentage = systemWidePromotion.DiscountPercentage;
+                }
 
                 if (!string.IsNullOrEmpty(discountPercentageString))
                     discountPercentage = decimal.Parse(discountPercentageString);
@@ -54,28 +96,35 @@ namespace CeramicShop.Controllers
                     ? subtotal * (1 - discountPercentage / 100)
                     : subtotal;
 
+                if (systemWideDiscountPercentage > 0)
+                {
+                    discountedTotal = discountedTotal * (1 - systemWideDiscountPercentage / 100);
+                }
+
                 // Create order with safe datetime values
                 var now = DateTime.Now;
-                // Ensure datetime is within SQL Server datetime range (Jan 1, 1753 to Dec 31, 9999)
                 if (now.Year < 1753)
                 {
                     now = new DateTime(1753, 1, 1);
                 }
+
+                var paymentMethod = _context.PaymentMethods.FirstOrDefault(pm => pm.PaymentMethodID == paymentMethodId);
 
                 var order = new Order
                 {
                     UserID = user.UserID,
                     TotalAmount = discountedTotal,
                     PaymentMethodID = paymentMethodId,
-                    OrderStatus = "Pending",
-                    Notes = notes ?? string.Empty, // Ensure Notes is not null
+                    OrderStatus = (paymentMethod != null && paymentMethod.MethodName == "Chuyển khoản (Banking)") ? "Confirmed" : "Pending",
+                    Notes = notes ?? string.Empty,
                     CreatedAt = now,
-                    UpdatedAt = now, // Ensure UpdatedAt is also set
-                    ShippingAddress = shippingAddress ?? string.Empty // Ensure ShippingAddress is not null
+                    UpdatedAt = now,
+                    ShippingAddress = shippingAddress ?? string.Empty
                 };
 
+
                 _context.Orders.Add(order);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync(); // sử dụng async
 
                 // Create order details
                 foreach (var item in cart.Items)
@@ -91,7 +140,7 @@ namespace CeramicShop.Controllers
                     _context.OrderDetails.Add(orderDetail);
 
                     // Update product stock
-                    var product = _context.Products.Find(item.ProductID);
+                    var product = await _context.Products.FindAsync(item.ProductID);
                     if (product != null)
                     {
                         product.StockQuantity -= item.Quantity;
@@ -99,7 +148,7 @@ namespace CeramicShop.Controllers
                     }
                 }
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync(); // sử dụng async
 
                 // Clear cart
                 HttpContext.Session.Remove("Cart");
@@ -366,7 +415,7 @@ namespace CeramicShop.Controllers
                 return new CartViewModel();
             }
 
-            return JsonSerializer.Deserialize<CartViewModel>(cartJson);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CartViewModel>(cartJson);
         }
     }
 }
