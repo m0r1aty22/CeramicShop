@@ -352,6 +352,16 @@
 
 
 </body>
+<script>
+    $(document).ready(function () {
+        // Khi mở bất kỳ modal nào, xóa backdrop
+        $('.modal').on('shown.bs.modal', function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open'); // Ngăn cản cuộn bị khoá
+            $('body').css('padding-right', '0'); // Fix lỗi layout bị lệch
+        });
+    });
+</script>
 </html>
 
 <script>
