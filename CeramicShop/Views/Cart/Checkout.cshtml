@@ -44,7 +44,7 @@
                         <div class="mb-3">
                             <label for="paymentMethodId" class="form-label">Phương thức thanh toán</label>
                             <select class="form-select" id="paymentMethodId" name="paymentMethodId" required>
-                                <option value="">Select Payment Method</option>
+                                <option value="">Chọn phương thức thanh toán</option>
                                 @foreach (var item in ViewBag.PaymentMethods)
                                 {
                                     <option value="@item.Value">@item.Text</option>

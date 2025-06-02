@@ -88,7 +88,6 @@
                             <th>Mã đơn</th>
                             <th>Khách hàng</th>
                             <th>Tổng tiền</th>
-                            <th>Phương thức thanh toán</th>
                             <th>Trạng thái</th>
                             <th>Ngày đặt</th>
                             <th>Code (Banking)</th>
@@ -104,11 +103,9 @@
                                     @if (order.User != null)
                                     {
                                         <div>@order.User.FullName</div>
-                                        <small class="text-muted">@order.User.Email</small>
                                     }
                                 </td>
                                 <td>@order.TotalAmount.ToString("N0") VNĐ</td>
-                                <td>@order.PaymentMethod?.MethodName</td>
                                 <td>
                                     @switch (order.OrderStatus)
                                     {

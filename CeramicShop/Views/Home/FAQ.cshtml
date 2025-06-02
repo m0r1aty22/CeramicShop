@@ -1,0 +1,59 @@
+﻿@{
+    ViewBag.Title = "Câu hỏi thường gặp - CeramicShop";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="text-orange">Câu hỏi thường gặp</h1>
+            <p class="lead">Câu trả lời cho các thắc mắc phổ biến</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Câu hỏi và giải đáp</h3>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading1">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                                    Làm thế nào để theo dõi đơn hàng?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="heading1" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Bạn có thể theo dõi đơn hàng bằng cách đăng nhập vào tài khoản và vào phần "Theo dõi đơn hàng".
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                                    Sản phẩm có giao hàng toàn quốc không?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="heading2" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Có, chúng tôi giao hàng toàn quốc với thời gian tùy thuộc vào khu vực.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-orange { color: #f4a261; }
+    .card { border: none; border-radius: 10px; transition: transform 0.2s; }
+    .card:hover { transform: scale(1.02); }
+    .card-title { color: #e76f51; }
+    .card-text { color: #264653; }
+    .shadow-sm { box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .accordion-button { color: #e76f51; }
+    .accordion-button:not(.collapsed) { background-color: #f4a261; color: white; }
+    .accordion-body { color: #264653; }
+</style>

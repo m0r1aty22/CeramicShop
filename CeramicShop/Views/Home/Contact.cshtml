@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Liên hệ - CeramicShop";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="text-orange">Liên hệ với chúng tôi</h1>
+            <p class="lead">Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Thông tin liên hệ</h3>
+                    <p class="card-text">
+                        <strong>Địa chỉ:</strong> 123 Đường Gốm, Quận 1, TP. Hồ Chí Minh<br>
+                        <strong>Điện thoại:</strong> (08) 1234 5678<br>
+                        <strong>Email:</strong> support@ceramicshop.vn<br>
+                        <strong>Giờ làm việc:</strong> 9:00 - 18:00, Thứ 2 - Thứ 7
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Gửi tin nhắn</h3>
+                    <form>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Họ và tên" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" rows="4" placeholder="Tin nhắn" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Gửi ngay</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-orange { color: #f4a261; }
+    .card { border: none; border-radius: 10px; transition: transform 0.2s; }
+    .card:hover { transform: scale(1.02); }
+    .card-title { color: #e76f51; }
+    .card-text { color: #264653; }
+    .shadow-sm { box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .btn-primary { background-color: #e76f51; border-color: #e76f51; }
+    .btn-primary:hover { background-color: #f4a261; border-color: #f4a261; }
+</style>
