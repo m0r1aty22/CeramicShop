@@ -218,3 +218,83 @@
                   language-code="vi"></df-messenger>
 </body>
 </html>
+
+<script>
+    $(document).ready(function () {
+        // Khi mở bất kỳ modal nào, xóa backdrop
+        $('.modal').on('shown.bs.modal', function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open'); // Ngăn cản cuộn bị khoá
+            $('body').css('padding-right', '0'); // Fix lỗi layout bị lệch
+        });
+    });
+</script>
+<script>
+    const toggleButton = document.getElementById('chat-toggle');
+    const chatbox = document.getElementById('chatbox');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.querySelector('.send-btn');
+
+    // Mở / đóng chat box
+    function toggleChat() {
+        chatbox.classList.toggle('open');
+    }
+
+    // Gửi tin nhắn
+    function sendMessage() {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+
+        // Hiển thị tin nhắn người dùng
+        const userMsg = document.createElement('div');
+        userMsg.className = 'msg-user';
+        userMsg.textContent = msg;
+        chatMessages.appendChild(userMsg);
+
+        chatInput.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Gửi đến server
+        $.ajax({
+            url: '@Url.Action("GeminiChat", "Chat")',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ userinput: msg }),
+            success: function (data) {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'msg-bot';
+                botMsg.innerHTML = data.html || data.message || 'Bot không phản hồi';
+                chatMessages.appendChild(botMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Lưu lịch sử chat
+                localStorage.setItem('chatContent', chatMessages.innerHTML);
+            },
+            error: function () {
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'msg-bot';
+                errorMsg.textContent = 'Lỗi khi kết nối đến server.';
+                chatMessages.appendChild(errorMsg);
+            }
+        });
+    }
+
+    // Sự kiện
+    toggleButton.addEventListener('click', toggleChat);
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // Load chat cũ
+    window.addEventListener('load', () => {
+        const savedChat = localStorage.getItem('chatContent');
+        if (savedChat) chatMessages.innerHTML = savedChat;
+    });
+
+    window.addEventListener('beforeunload', () => {
+        localStorage.setItem('chatContent', chatMessages.innerHTML);
+    });
+</script>
+
